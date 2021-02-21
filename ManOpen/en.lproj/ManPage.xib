@@ -27,23 +27,26 @@
                 <rect key="frame" x="0.0" y="0.0" width="588" height="451"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="453" translatesAutoresizingMaskIntoConstraints="NO" id="10">
-                        <rect key="frame" x="75" y="422" width="457" height="22"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="453" translatesAutoresizingMaskIntoConstraints="NO" id="10">
+                        <rect key="frame" x="75" y="423" width="39" height="21"/>
                         <textFieldCell key="cell" alignment="left" title="Title" id="62">
-                            <font key="font" size="18" name="Helvetica"/>
+                            <font key="font" metaFont="system" size="18"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="21">
-                        <rect key="frame" x="17" y="401" width="48" height="48"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <imageView translatesAutoresizingMaskIntoConstraints="NO" id="21">
+                        <rect key="frame" x="17" y="396" width="48" height="53"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="48" id="2dB-Qk-O6M"/>
+                        </constraints>
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="ManOpen" id="63"/>
                     </imageView>
-                    <button toolTip=" Open selection " fixedFrame="YES" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="25">
-                        <rect key="frame" x="526" y="400" width="44" height="44"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                    <button toolTip=" Open selection " imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="25">
+                        <rect key="frame" x="526" y="395" width="44" height="49"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="40" id="Me4-Bl-SJ0"/>
+                        </constraints>
                         <buttonCell key="cell" type="bevel" bezelStyle="regularSquare" image="helpQMark" imagePosition="only" alignment="center" borderStyle="border" inset="2" id="64">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -52,15 +55,14 @@
                             <action selector="openSelection:" target="-2" id="27"/>
                         </connections>
                     </button>
-                    <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="40">
-                        <rect key="frame" x="-2" y="-2" width="592" height="397"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                    <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="40">
+                        <rect key="frame" x="-2" y="-2" width="592" height="392"/>
                         <clipView key="contentView" id="LLT-hP-uba">
-                            <rect key="frame" x="1" y="1" width="575" height="395"/>
+                            <rect key="frame" x="1" y="1" width="575" height="390"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <customView id="41" customClass="ManTextView">
-                                    <rect key="frame" x="0.0" y="0.0" width="574" height="395"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="574" height="390"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <connections>
                                         <outlet property="delegate" destination="-2" id="43"/>
@@ -74,13 +76,16 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="67">
-                            <rect key="frame" x="576" y="1" width="15" height="395"/>
+                            <rect key="frame" x="576" y="1" width="15" height="390"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
-                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="45">
-                        <rect key="frame" x="345" y="410" width="163" height="22"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                    <popUpButton verticalHuggingPriority="750" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="45">
+                        <rect key="frame" x="345" y="408" width="163" height="22"/>
+                        <constraints>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="155" id="i0n-wr-ZEh"/>
+                            <constraint firstAttribute="height" constant="16" id="uc2-oH-QR8"/>
+                        </constraints>
                         <popUpButtonCell key="cell" type="push" title="Section:" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="clipping" borderStyle="border" inset="2" pullsDown="YES" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="49" id="65">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="smallSystem"/>
@@ -95,6 +100,23 @@
                         </connections>
                     </popUpButton>
                 </subviews>
+                <constraints>
+                    <constraint firstItem="40" firstAttribute="centerX" secondItem="9" secondAttribute="centerX" id="Jem-hu-la7"/>
+                    <constraint firstItem="45" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="10" secondAttribute="trailing" constant="12" id="Ksm-iD-aP4"/>
+                    <constraint firstItem="25" firstAttribute="leading" secondItem="45" secondAttribute="trailing" constant="24" id="MNq-Vk-4YL"/>
+                    <constraint firstItem="21" firstAttribute="top" secondItem="9" secondAttribute="top" constant="2" id="OMA-hE-pci"/>
+                    <constraint firstItem="21" firstAttribute="leading" secondItem="9" secondAttribute="leading" constant="17" id="Qwj-rQ-WEb"/>
+                    <constraint firstAttribute="bottom" secondItem="40" secondAttribute="bottom" constant="-2" id="cYb-YO-0Bc"/>
+                    <constraint firstItem="45" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="21" secondAttribute="trailing" constant="8" symbolic="YES" id="ezy-g2-mjt"/>
+                    <constraint firstItem="40" firstAttribute="leading" secondItem="9" secondAttribute="leading" constant="-2" id="gTc-Nu-5I4"/>
+                    <constraint firstItem="10" firstAttribute="top" secondItem="9" secondAttribute="top" constant="7" id="iho-mq-m5N"/>
+                    <constraint firstItem="40" firstAttribute="top" secondItem="21" secondAttribute="bottom" constant="6" id="nfH-4A-RiH"/>
+                    <constraint firstItem="10" firstAttribute="leading" secondItem="21" secondAttribute="trailing" constant="12" id="onY-mB-7KM"/>
+                    <constraint firstItem="40" firstAttribute="top" secondItem="25" secondAttribute="bottom" constant="8" symbolic="YES" id="sjb-yc-OxG"/>
+                    <constraint firstItem="45" firstAttribute="centerY" secondItem="25" secondAttribute="centerY" id="v0j-ep-1fg"/>
+                    <constraint firstItem="25" firstAttribute="top" secondItem="9" secondAttribute="top" constant="9" id="xSp-Ad-mMc"/>
+                    <constraint firstAttribute="trailing" secondItem="25" secondAttribute="trailing" constant="20" symbolic="YES" id="yTI-d9-DJU"/>
+                </constraints>
             </view>
             <connections>
                 <outlet property="initialFirstResponder" destination="41" id="44"/>
@@ -103,7 +125,7 @@
         </window>
     </objects>
     <resources>
-        <image name="ManOpen" width="128" height="128"/>
+        <image name="ManOpen" width="48" height="48"/>
         <image name="helpQMark" width="40" height="40"/>
     </resources>
 </document>
