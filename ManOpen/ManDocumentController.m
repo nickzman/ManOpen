@@ -47,25 +47,27 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
     return path;
 }
 
+@interface ManDocumentController ()
+@property(nonatomic,retain) NSConnection *doConnection;
+@end
+
 @implementation ManDocumentController
 
-- init
+- (instancetype)init
 {
-    NSConnection *connection = [NSConnection defaultConnection];
-
-    [super init];
-
-    /*
-     * Set ourselves up for DO connections.  I do it here so it's done as
-     * early as possible.  If the command-line tool still has problems
-     * connecting, we may be able to do this whole thing in main()...
-     */
-    [connection registerName:@"ManOpenApp"];
-    [connection setRootObject:self];
-
-    [PrefPanelController registerManDefaults];
-    [NSBundle loadNibNamed:@"DocController" owner:self];
-
+	self = [super init];
+	if (self)
+	{
+		self.doConnection = [NSConnection serviceConnectionWithName:@"ManOpenApp" rootObject:self];
+		/*
+		 * Set ourselves up for DO connections.  I do it here so it's done as
+		 * early as possible.  If the command-line tool still has problems
+		 * connecting, we may be able to do this whole thing in main()...
+		 */
+		
+		[PrefPanelController registerManDefaults];
+		[[NSBundle mainBundle] loadNibNamed:@"DocController" owner:self topLevelObjects:NULL];
+	}
     return self;
 }
 
@@ -138,7 +140,6 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
         NSMutableDictionary *environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
         [environment addEntriesFromDictionary:extraEnv];
         [task setEnvironment:environment];
-        [environment release];
     }
 
     [task setLaunchPath:@"/bin/sh"];
@@ -155,8 +156,6 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
         output = [[pipe fileHandleForReading] readDataToEndOfFileIgnoreInterrupt];
     }
     [task waitUntilExit];
-    [pipe release];
-    [task release];
 
     return output;
 }
@@ -215,7 +214,8 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
 {
     NSFileHandle  *handle;
     NSFileManager *manager = [NSFileManager defaultManager];
-    NSDictionary  *attributes = [manager fileAttributesAtPath:filename traverseLink:YES];
+	NSError *err = nil;
+	NSDictionary *attributes = [manager attributesOfItemAtPath:filename error:&err];
     NSUInteger    maxLength = MIN(150, (NSUInteger)[attributes fileSize]);
     NSData        *fileHeader;
     NSString      *catType = @"cat";
@@ -254,7 +254,7 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
  * by file contents and not extension.  it's possible we could move the type-determining
  * logic into ManDocument itself, but it seems to work this way...
  */
-- (id)openDocumentWithContentsOfURL:(NSURL *)absoluteURL display:(BOOL)display error:(NSError **)outError
+- (void)openDocumentWithContentsOfURL:(NSURL *)url display:(BOOL)displayDocument completionHandler:(void (^)(NSDocument * _Nullable, BOOL, NSError * _Nullable))completionHandler
 {
     NSDocument *document;
 
@@ -266,8 +266,10 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
      * also make document lookup always find the file if it's open, even if under
      * another name, a common situation with man pages.
      */
-    NSString *filename = [[absoluteURL path] stringByStandardizingPath];
+    NSString *filename = [url.path stringByStandardizingPath];
     NSURL *standardizedURL = [NSURL fileURLWithPath:filename];
+	NSError *outError = nil;
+	BOOL alreadyOpen = NO;
     
     if ((document = [self documentForURL:standardizedURL]) == nil)
     {
@@ -276,42 +278,24 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
 
         if (type != nil)
         {
-            document = [self makeDocumentWithContentsOfURL:standardizedURL ofType:type error:outError];
+            document = [self makeDocumentWithContentsOfURL:standardizedURL ofType:type error:&outError];
             [document makeWindowControllers];
             [self addDocument:document];
         }
     }
-    if (display)
+	else
+		alreadyOpen = YES;
+	
+    if (displayDocument)
         [document showWindows];
-    return document;
+	completionHandler(document, alreadyOpen, outError);
 }
 
 
-#if NS_BLOCKS_AVAILABLE
-/*
- * The super implementations of these likewise get confused if someone opens a non-declared
- * extension, even when declaring public.data as a generic type.  When linked against 10.7
- * libraries, these are called instead of the older method above, and I'm getting
- * " QLError(): +[QLSeamlessDocumentOpener seamlessDocumentOpenerForURL:] should only be called in the main thread"
- * errors.  That may be related to the canConcurrentlyReadDocumentsOfType: in the document classes.
- * Overriding these to just call our older override above seems to fix
- * it. If linked against 10.6 or earlier, the default implementation will simply
- * call our override directly it seems.
- */
-- (void)openDocumentWithContentsOfURL:(NSURL *)url display:(BOOL)displayDocument completionHandler:(void (^)(NSDocument *document, BOOL documentWasAlreadyOpen, NSError *error))completionHandler
-{
-    NSError *error = nil;
-    NSUInteger numDocuments = [[self documents] count];
-    NSDocument *document = [self openDocumentWithContentsOfURL:url display:displayDocument error:&error];
-    BOOL docAdded = numDocuments < [[self documents] count];
-    
-    completionHandler(document, !docAdded, error);
-}
 - (void)reopenDocumentForURL:(NSURL *)url withContentsOfURL:(NSURL*)url2 display:(BOOL)displayDocument completionHandler:(void (^)(NSDocument *document, BOOL documentWasAlreadyOpen, NSError *error))completionHandler
 {
     [self openDocumentWithContentsOfURL:url display:displayDocument completionHandler:completionHandler];
 }
-#endif
 
 /* Ignore the types; man/cat files can have any range of extensions. */
 - (NSInteger)runModalOpenPanel:(NSOpenPanel *)openPanel forTypes:(NSArray *)openableFileExtensions
@@ -360,9 +344,9 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
     {
         NSString *filename;
 
-        document = [[[ManDocument alloc]
+        document = [[ManDocument alloc]
                         initWithName:name section:section
-                        manPath:manPath title:title] autorelease];
+                        manPath:manPath title:title];
         [self addDocument:document];
         [document makeWindowControllers];
 
@@ -384,8 +368,8 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
 
     if ((document = [self documentForTitle:title]) == nil)
     {
-        document = [[[AproposDocument alloc]
-                        initWithString:apropos manPath:manPath title:title] autorelease];
+        document = [[AproposDocument alloc]
+                        initWithString:apropos manPath:manPath title:title];
         if (document) [self addDocument:document];
         [document makeWindowControllers];
     }
@@ -401,27 +385,29 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
 "*/
 - (id)openWord:(NSString *)word
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSString *section = nil;
-    NSString *base    = word;
-    NSRange lparenRange = [word rangeOfString:@"("];
-    NSRange rparenRange = [word rangeOfString:@")"];
-    id document;
-
-    if (lparenRange.length != 0 && rparenRange.length != 0 &&
-        lparenRange.location < rparenRange.location)
-    {
-        NSRange sectionRange;
-
-        sectionRange.location = NSMaxRange(lparenRange);
-        sectionRange.length = rparenRange.location - sectionRange.location;
-
-        base = [word substringToIndex:lparenRange.location];
-        section = [word substringWithRange:sectionRange];
-    }
-
-    document = [self openDocumentWithName:base section:section manPath:[[NSUserDefaults standardUserDefaults] manPath]];
-    [pool release];
+	id document;
+	
+	@autoreleasepool
+	{
+		NSString *section = nil;
+		NSString *base    = word;
+		NSRange lparenRange = [word rangeOfString:@"("];
+		NSRange rparenRange = [word rangeOfString:@")"];
+		
+		if (lparenRange.length != 0 && rparenRange.length != 0 &&
+			lparenRange.location < rparenRange.location)
+		{
+			NSRange sectionRange;
+			
+			sectionRange.location = NSMaxRange(lparenRange);
+			sectionRange.length = rparenRange.location - sectionRange.location;
+			
+			base = [word substringToIndex:lparenRange.location];
+			section = [word substringWithRange:sectionRange];
+		}
+		
+		document = [self openDocumentWithName:base section:section manPath:[[NSUserDefaults standardUserDefaults] manPath]];
+	}
     return document;
 }
 
@@ -450,7 +436,7 @@ static NSArray *GetWordArray(NSString *string)
     NSArray *words = GetWordArray(string);
     
     if ([words count] > 20) {
-        NSInteger reply = NSRunAlertPanel(@"Warning", @"This will open approximately %d windows!",
+        NSInteger reply = NSRunAlertPanel(@"Warning", @"This will open approximately %lu windows!",
                                           @"Cancel", @"Continue", nil, [words count]);
         if (reply != NSAlertAlternateReturn)
             return;
@@ -542,7 +528,7 @@ static BOOL IsSectionWord(NSString *word)
     if ([string length] > 0 && [openSectionPopup indexOfSelectedItem] > 0 &&
         [string rangeOfString:@"("].length == 0)
     {
-        string = [string stringByAppendingFormat:@"(%d)", [openSectionPopup indexOfSelectedItem]];
+        string = [string stringByAppendingFormat:@"(%lu)", [openSectionPopup indexOfSelectedItem]];
     }
 
     [self openString:string];
@@ -563,7 +549,7 @@ static BOOL IsSectionWord(NSString *word)
     else if ([sender tag] == 20)
         [self openApropos:@"(n)"];
     else
-        [self openApropos:[NSString stringWithFormat:@"(%d", [sender tag]]];
+        [self openApropos:[NSString stringWithFormat:@"(%lu", [sender tag]]];
 }
 
 - (BOOL)useModalPanels
@@ -647,7 +633,9 @@ static BOOL IsSectionWord(NSString *word)
 {
     if (force)
         [self ensureActive];
-    [self openDocumentWithContentsOfURL:[NSURL fileURLWithPath:filename] display:YES error:NULL];
+	[self openDocumentWithContentsOfURL:[NSURL fileURLWithPath:filename] display:true completionHandler:^(NSDocument * _Nullable document, BOOL documentWasAlreadyOpen, NSError * _Nullable error) {
+		// Don't have to do anything here...
+	}];
 }
 
 /*" Simple API methods to open a named man page "*/
@@ -701,10 +689,12 @@ static BOOL IsSectionWord(NSString *word)
         (fileArray = [pboard propertyListForType:NSFilenamesPboardType]))
     {
         NSUInteger i, count = [fileArray count];
-        NSError *openError = nil;
+        __block NSError *openError = nil;
         for (i=0; i<count; i++)
         {
-            [self openDocumentWithContentsOfURL:[NSURL fileURLWithPath:[fileArray objectAtIndex:i]] display:YES error:&openError];
+			[self openDocumentWithContentsOfURL:[NSURL fileURLWithPath:fileArray[i]] display:YES completionHandler:^(NSDocument * _Nullable document, BOOL documentWasAlreadyOpen, NSError * _Nullable error) {
+				openError = error;
+			}];
         }
         
         if (error != NULL && openError != nil)

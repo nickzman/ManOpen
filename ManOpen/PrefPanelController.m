@@ -128,11 +128,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [manPathArray release];
-    [super dealloc];
-}
 
 - (void)windowDidLoad
 {
@@ -242,16 +237,10 @@
 
 - (BOOL)containsScreenPoint:(NSPoint)screenPoint
 {
-    NSPoint windowPoint = [[self window] convertScreenToBase:screenPoint];
+	NSPoint windowPoint = [self.window convertPointFromScreen:screenPoint];
     NSPoint viewPoint = [self convertPoint:windowPoint fromView:nil];
 
     return NSMouseInRect(viewPoint, [self bounds], [self isFlipped]);
-}
-
-- (void)dragImage:(NSImage *)anImage at:(NSPoint)imageLoc offset:(NSSize)mouseOffset event:(NSEvent *)theEvent pasteboard:(NSPasteboard *)pboard source:(id)sourceObject slideBack:(BOOL)slideBack
-{
-    /* Prevent slide back prior to Lion (where we can control it with newer methods) */
-    [super dragImage:anImage at:imageLoc offset:mouseOffset event:theEvent pasteboard:pboard source:sourceObject slideBack:IsLion() && slideBack];
 }
 
 /* Only implement the 10.7 method, since I don't think we can conditionally affect the "slide back" value prior to 10.7 */
@@ -261,8 +250,7 @@
     [session setValue:[NSNumber numberWithBool:[self containsScreenPoint:screenPoint]] forKey:SessionSlideBackKey];
 }
 
-/* 10.7 has a new method, but it still calls this one, so this is all we need */
-- (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation
+- (void)draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation
 {
     /* Only try the poof if the operation was None (nothing accepted the drop) and it is outside our view */
     if (operation == NSDragOperationNone && ![self containsScreenPoint:screenPoint])
@@ -273,7 +261,7 @@
             NSShowAnimationEffect(NSAnimationEffectDisappearingItemDefault, screenPoint, NSZeroSize, nil, nil, nil);
         }
     }
-    [super draggedImage:anImage endedAt:screenPoint operation:operation];
+	[super draggingSession:session endedAtPoint:screenPoint operation:operation];
 }
 
 @end
@@ -291,7 +279,7 @@
     {
         static NSString *resHome = nil;
         if (resHome == nil)
-            resHome = [[[NSHomeDirectory() stringByResolvingSymlinksInPath] stringByAppendingString:@"/"] retain];
+            resHome = [[NSHomeDirectory() stringByResolvingSymlinksInPath] stringByAppendingString:@"/"];
 
         if ([new hasPrefix:resHome])
             new = [@"~/" stringByAppendingString:[new substringFromIndex:[resHome length]]];
@@ -390,38 +378,34 @@ static NSString *ManPathArrayKey = @"manPathArray";
 - (IBAction)addPathFromPanel:(id)sender
 {
     NSOpenPanel *panel = [NSOpenPanel openPanel];
+	__weak PrefPanelController *weakSelf = self;
 
     [panel setAllowsMultipleSelection:YES];
     [panel setCanChooseDirectories:YES];
     [panel setCanChooseFiles:NO];
 
-    [panel beginSheetForDirectory:nil file:nil
-         modalForWindow:[self window]
-         modalDelegate:self
-         didEndSelector:@selector(didAddManPathFromPanel:code:context:)
-         contextInfo:NULL];
-}
-- (void)didAddManPathFromPanel:(NSOpenPanel *)panel code:(int)returnCode context:(void *)context
-{
-    if (returnCode == NSOKButton)
-    {
-        NSArray *urls = [panel URLs];
-        NSUInteger i, count = [urls count];
-        NSMutableArray *paths = [NSMutableArray arrayWithCapacity:count];
+	[panel beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse result) {
+		if (result == NSFileHandlingPanelOKButton)
+		{
+			PrefPanelController *strongSelf = weakSelf;
+			NSArray *urls = [panel URLs];
+			NSUInteger i, count = [urls count];
+			NSMutableArray *paths = [NSMutableArray arrayWithCapacity:count];
 
-        for (i=0; i<count; i++)
-        {
-            NSURL *url = [urls objectAtIndex:i];
-            if ([url isFileURL])
-                [paths addObject:[url path]];
-        }
+			for (i=0; i<count; i++)
+			{
+				NSURL *url = [urls objectAtIndex:i];
+				if ([url isFileURL])
+					[paths addObject:[url path]];
+			}
 
-        NSUInteger insertionIndex = [manPathController selectionIndex];
-        if (insertionIndex == NSNotFound)
-            insertionIndex = [manPathArray count]; //add it on the end
+			NSUInteger insertionIndex = [strongSelf->manPathController selectionIndex];
+			if (insertionIndex == NSNotFound)
+				insertionIndex = [strongSelf->manPathArray count]; //add it on the end
 
-        [self addPathDirectories:paths atIndex:insertionIndex removeFirst:nil];
-    }
+			[self addPathDirectories:paths atIndex:insertionIndex removeFirst:nil];
+		}
+	}];
 }
 
 - (NSArray *)pathsAtIndexes:(NSIndexSet *)set
@@ -589,18 +573,13 @@ static NSString *ManPathArrayKey = @"manPathArray";
 
 /* Little class to store info on the possible man page viewers, for easier sorting by display name */
 @interface MVAppInfo : NSObject
-{
-    NSString *bundleID;
-    NSString *displayName;
-    NSURL *appURL;
-}
 
 + (NSArray *)allManViewerApps;
 + (void)addAppWithID:(NSString *)aBundleID sort:(BOOL)shouldResort;
 + (NSUInteger)indexOfBundleID:(NSString*)bundleID;
-- (NSString *)bundleID;
-- (NSString *)displayName;
-- (NSURL *)appURL;
+@property(nonatomic,retain) NSString *bundleID;
+@property(nonatomic,retain) NSString *displayName;
+@property(nonatomic,retain) NSURL *appURL;
 
 @end
 
@@ -611,23 +590,20 @@ static NSString *ManPathArrayKey = @"manPathArray";
 
 static NSMutableArray *allApps = nil;
 
-- (id)initWithBundleID:(NSString *)aBundleID
+- (instancetype)initWithBundleID:(NSString *)aBundleID
 {
-    bundleID = [aBundleID retain];
+	self = [self init];
+	if (self)
+	{
+		_bundleID = aBundleID;
+	}
     return self;
 }
 
-- (void)dealloc
-{
-    [appURL release];
-    [displayName release];
-    [bundleID release];
-    [super dealloc];
-}
 
 - (BOOL)isEqualToBundleID:(NSString *)aBundleID
 {
-    return [bundleID caseInsensitiveCompare:aBundleID] == NSOrderedSame;
+    return [self.bundleID caseInsensitiveCompare:aBundleID] == NSOrderedSame;
 }
 - (BOOL)isEqual:(id)other
 {
@@ -635,44 +611,41 @@ static NSMutableArray *allApps = nil;
 }
 - (NSUInteger)hash
 {
-    return [[bundleID lowercaseString] hash];
+    return [[self.bundleID lowercaseString] hash];
 }
 - (NSComparisonResult)compareDisplayName:(id)other
 {
     return [[self displayName] localizedCaseInsensitiveCompare:[other displayName]];
 }
 
-- (NSString *)bundleID
-{
-    return bundleID;
-}
 
 - (NSURL *)appURL
 {
-    if (appURL == nil)
+    if (_appURL == nil)
     {
-        NSString *path = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:bundleID];
+        NSString *path = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:self.bundleID];
         if (path != nil)
-            appURL = [[NSURL fileURLWithPath:path] retain];
+            _appURL = [NSURL fileURLWithPath:path];
     }
 
-    return appURL;
+    return _appURL;
 }
 
 - (NSString *)displayName
 {
-    if (displayName == nil)
+    if (_displayName == nil)
     {
         NSURL *url = [self appURL];
-        NSDictionary *infoDict = [(id)CFBundleCopyInfoDictionaryForURL((CFURLRef)url) autorelease];
+		NSDictionary *infoDict = (id)CFBridgingRelease(CFBundleCopyInfoDictionaryForURL((CFURLRef)url));
         NSString *appVersion;
         NSString *niceName = nil;
+		CFStringRef niceNameCF = NULL;
 
         if (infoDict == nil)
             infoDict = [[NSBundle bundleWithPath:[url path]] infoDictionary];
         
-        LSCopyDisplayNameForURL((CFURLRef)url, (CFStringRef*)&niceName);
-        [niceName autorelease];
+		LSCopyDisplayNameForURL((__bridge CFURLRef)url, &niceNameCF);
+		niceName = CFBridgingRelease(niceNameCF);
         if (niceName == nil)
             niceName = [[url path] lastPathComponent];
         
@@ -680,10 +653,10 @@ static NSMutableArray *allApps = nil;
         if (appVersion != nil)
             niceName = [NSString stringWithFormat:@"%@ (%@)", niceName, appVersion];
 
-        displayName = [niceName retain];
+		_displayName = niceName;
     }
     
-    return displayName;
+    return _displayName;
 }
 
 + (void)sortApps
@@ -699,7 +672,6 @@ static NSMutableArray *allApps = nil;
         if (shouldResort)
             [self sortApps];
     }
-    [info release];
 }
 
 + (NSArray *)allManViewerApps
@@ -711,7 +683,7 @@ static NSMutableArray *allApps = nil;
 //        NSURL *url = [NSURL fileURLWithPath:appPath];
 //        LSRegisterURL((CFURLRef)url, false);
         
-        NSArray *allBundleIDs = [(id)LSCopyAllHandlersForURLScheme((CFStringRef)URL_SCHEME) autorelease];
+		NSArray *allBundleIDs = (id)CFBridgingRelease(LSCopyAllHandlersForURLScheme((CFStringRef)URL_SCHEME));
         NSUInteger i;
 
         allApps = [[NSMutableArray alloc] initWithCapacity:[allBundleIDs count]];
@@ -779,10 +751,8 @@ static NSString *currentAppID = nil;
         }
         [appPopup addItemWithTitle:displayName];
 
-        [image setScalesWhenResized:YES];
         [image setSize:NSMakeSize(16, 16)];
         [[appPopup itemAtIndex:i] setImage:image];
-        [image release];
     }
 
     if ([apps count] > 0)
@@ -793,7 +763,7 @@ static NSString *currentAppID = nil;
 
 - (void)resetCurrentApp
 {
-    NSString *currSetID = (id)LSCopyDefaultHandlerForURLScheme((CFStringRef)URL_SCHEME);
+	NSString *currSetID = (id)CFBridgingRelease(LSCopyDefaultHandlerForURLScheme((CFStringRef)URL_SCHEME));
     
     if (currSetID == nil)
         currSetID = [[[MVAppInfo allManViewerApps] objectAtIndex:0] bundleID];
@@ -802,9 +772,7 @@ static NSString *currentAppID = nil;
     {
         BOOL resetPopup = (currentAppID == nil); //first time
 
-        [currentAppID release];
-        currentAppID = [currSetID retain];
-        [currSetID release];
+		currentAppID = currSetID;
 
         if ([MVAppInfo indexOfBundleID:currSetID] == NSNotFound)
         {
@@ -820,7 +788,7 @@ static NSString *currentAppID = nil;
 
 - (void)setManPageViewer:(NSString *)bundleID
 {
-    OSStatus error = LSSetDefaultHandlerForURLScheme((CFStringRef)URL_SCHEME, (CFStringRef)bundleID);
+	OSStatus error = LSSetDefaultHandlerForURLScheme((CFStringRef)URL_SCHEME, (__bridge CFStringRef)bundleID);
     
     if (error != noErr)
         NSLog(@"Could not set default " URL_SCHEME_PREFIX @" app: Launch Services error %d", error);
@@ -850,20 +818,17 @@ static NSString *currentAppID = nil;
         [panel setAllowsMultipleSelection:NO];
         [panel setResolvesAliases:YES];
         [panel setCanChooseFiles:YES];
-        [panel beginSheetForDirectory:nil file:nil types:[NSArray arrayWithObject:@"app"]
-                       modalForWindow:[appPopup window] modalDelegate:self
-                       didEndSelector:@selector(panelDidEnd:code:context:) contextInfo:NULL];
+		[panel beginSheetModalForWindow:appPopup.window completionHandler:^(NSModalResponse result) {
+			if (result == NSFileHandlingPanelOKButton)
+			{
+				NSURL *appURL = [panel URL];
+				NSString *appID = [[NSBundle bundleWithPath:[appURL path]] bundleIdentifier];
+				if (appID != nil)
+					[self setManPageViewer:appID];
+			}
+			[self setAppPopupToCurrent];
+		}];
     }
 }
 
-- (void)panelDidEnd:(NSOpenPanel *)panel code:(int)returnCode context:(void *)context
-{
-    if (returnCode == NSOKButton) {
-        NSURL *appURL = [panel URL];
-        NSString *appID = [[NSBundle bundleWithPath:[appURL path]] bundleIdentifier];
-        if (appID != nil)
-            [self setManPageViewer:appID];
-    }
-    [self setAppPopupToCurrent];
-}
 @end

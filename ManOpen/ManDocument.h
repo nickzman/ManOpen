@@ -1,14 +1,13 @@
 
 #import "SystemType.h"
-#import <AppKit/NSDocument.h>
+#import <AppKit/AppKit.h>
 
 @class NSMutableArray, NSMutableDictionary;
 @class ManTextView;
 @class NSTextField, NSText, NSButton, NSPopUpButton;
 
-@interface ManDocument : NSDocument
+@interface ManDocument : NSDocument <NSWindowDelegate>
 {
-    NSString *shortTitle;
     NSData *taskData;
     BOOL hasLoaded;
     NSURL *copyURL;
@@ -22,10 +21,9 @@
     IBOutlet NSPopUpButton *sectionPopup;
 }
 
-- initWithName:(NSString *)name section:(NSString *)section manPath:(NSString *)manPath title:(NSString *)title;
+- (instancetype)initWithName:(NSString *)name section:(NSString *)section manPath:(NSString *)manPath title:(NSString *)title;
 
-- (NSString *)shortTitle;
-- (void)setShortTitle:(NSString *)aString;
+@property(nonatomic,retain) NSString *shortTitle;
 
 - (NSText *)textView;
 

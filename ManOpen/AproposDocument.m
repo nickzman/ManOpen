@@ -25,13 +25,13 @@
     
     titles = [[NSMutableArray alloc] init];
     descriptions = [[NSMutableArray alloc] init];
-    title = [aTitle retain];
+	title = aTitle;
     [self setFileType:@"apropos"];
 
     /* Searching for a blank string doesn't work anymore... use a catchall regex */
     if ([apropos length] == 0)
         apropos = @".";
-    searchString = [apropos retain];
+	searchString = apropos;
 
     /*
      * Starting on Tiger, man -k doesn't quite work the same as apropos directly.
@@ -45,31 +45,24 @@
     [command appendFormat:@" %@", EscapePath(apropos, YES)];
     output = [docController dataByExecutingCommand:command manPath:manPath];
     /* The whatis database appears to not be UTF8 -- at least, UTF8 can fail, even on 10.7 */
-    [self parseOutput:[[[NSString alloc] initWithData:output encoding:NSMacOSRomanStringEncoding] autorelease]];
+	[self parseOutput:[[NSString alloc] initWithData:output encoding:NSASCIIStringEncoding]];
 }
 
-- (id)initWithString:(NSString *)apropos manPath:(NSString *)manPath title:(NSString *)aTitle
+- (instancetype)initWithString:(NSString *)apropos manPath:(NSString *)manPath title:(NSString *)aTitle
 {
-    [super init];
-    [self _loadWithString:apropos manPath:manPath title:aTitle];
-    
-    if ([titles count] == 0) {
-        NSRunAlertPanel(@"Nothing found", @"No pages related to '%@' found", nil, nil, nil, apropos);
-        [self release];
-        return nil;
-    }
-
+	self = [super init];
+	if (self)
+	{
+		[self _loadWithString:apropos manPath:manPath title:aTitle];
+		
+		if ([titles count] == 0) {
+			NSRunAlertPanel(@"Nothing found", @"No pages related to '%@' found", nil, nil, nil, apropos);
+			return nil;
+		}
+	}
     return self;
 }
 
-- (void)dealloc
-{
-    [title release];
-    [titles release];
-    [descriptions release];
-    [searchString release];
-    [super dealloc];
-}
 
 - (NSString *)windowNibName
 {
@@ -151,11 +144,11 @@
     }
 }
 
-- (void)printShowingPrintPanel:(BOOL)showPanel
+- (void)printDocumentWithSettings:(NSDictionary<NSPrintInfoAttributeKey,id> *)printSettings showPrintPanel:(BOOL)showPrintPanel delegate:(id)delegate didPrintSelector:(SEL)didPrintSelector contextInfo:(void *)contextInfo
 {
     NSPrintOperation *op = [NSPrintOperation printOperationWithView:tableView];
-    [op setShowsPrintPanel:showPanel];
-    [op setShowsProgressPanel:showPanel];
+    [op setShowsPrintPanel:showPrintPanel];
+    [op setShowsProgressPanel:showPrintPanel];
     [op runOperationModalForWindow:[tableView window] delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
