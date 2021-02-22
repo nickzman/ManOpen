@@ -58,7 +58,6 @@
 		E0494B3225E1DA3E00F0A452 /* ManOpen.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2725E1DA3E00F0A452 /* ManOpen.xib */; };
 		E0494B3325E1DA3E00F0A452 /* PrefPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2925E1DA3E00F0A452 /* PrefPanel.xib */; };
 		E0494B3425E1DA3E00F0A452 /* Apropos.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2B25E1DA3E00F0A452 /* Apropos.xib */; };
-		E0494B3525E1DA3E00F0A452 /* FindPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2D25E1DA3E00F0A452 /* FindPanel.xib */; };
 		E0494B3625E1DA3E00F0A452 /* DocController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2F25E1DA3E00F0A452 /* DocController.xib */; };
 /* End PBXBuildFile section */
 
@@ -154,7 +153,6 @@
 		E0494B2825E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ManOpen.xib; sourceTree = "<group>"; };
 		E0494B2A25E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PrefPanel.xib; sourceTree = "<group>"; };
 		E0494B2C25E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/Apropos.xib; sourceTree = "<group>"; };
-		E0494B2E25E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/FindPanel.xib; sourceTree = "<group>"; };
 		E0494B3025E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/DocController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -288,7 +286,6 @@
 			children = (
 				E0494B2B25E1DA3E00F0A452 /* Apropos.xib */,
 				E0494B2F25E1DA3E00F0A452 /* DocController.xib */,
-				E0494B2D25E1DA3E00F0A452 /* FindPanel.xib */,
 				E0494B2725E1DA3E00F0A452 /* ManOpen.xib */,
 				E0494B2525E1DA3E00F0A452 /* ManPage.xib */,
 				E0494B2925E1DA3E00F0A452 /* PrefPanel.xib */,
@@ -593,7 +590,6 @@
 				D38A241714E4C3FE00F6AFFE /* ManOpen.scriptTerminology in Resources */,
 				E0494B3625E1DA3E00F0A452 /* DocController.xib in Resources */,
 				D38A241814E4C3FE00F6AFFE /* Credits.rtf in Resources */,
-				E0494B3525E1DA3E00F0A452 /* FindPanel.xib in Resources */,
 				D38A241914E4C3FE00F6AFFE /* InfoPlist.strings in Resources */,
 				D3EA5B5A14E8DA3700AB000A /* helpQMark.tiff in Resources */,
 			);
@@ -742,14 +738,6 @@
 				E0494B2C25E1DA3E00F0A452 /* en */,
 			);
 			name = Apropos.xib;
-			sourceTree = "<group>";
-		};
-		E0494B2D25E1DA3E00F0A452 /* FindPanel.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				E0494B2E25E1DA3E00F0A452 /* en */,
-			);
-			name = FindPanel.xib;
 			sourceTree = "<group>";
 		};
 		E0494B2F25E1DA3E00F0A452 /* DocController.xib */ = {

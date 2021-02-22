@@ -220,23 +220,23 @@
                                     <items>
                                         <menuItem title="Find…" tag="1" keyEquivalent="f" id="358">
                                             <connections>
-                                                <action selector="performFindPanelAction:" target="-1" id="391"/>
+                                                <action selector="performTextFinderAction:" target="-1" id="9Eu-9S-bqB"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Find Next" tag="2" keyEquivalent="g" id="359">
                                             <connections>
-                                                <action selector="performFindPanelAction:" target="-1" id="392"/>
+                                                <action selector="performTextFinderAction:" target="-1" id="Y4x-nu-syW"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Find Previous" tag="3" keyEquivalent="G" id="362">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
-                                                <action selector="performFindPanelAction:" target="-1" id="393"/>
+                                                <action selector="performTextFinderAction:" target="-1" id="Lln-KT-naZ"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Use Selection for Find" tag="7" keyEquivalent="e" id="360">
                                             <connections>
-                                                <action selector="performFindPanelAction:" target="-1" id="394"/>
+                                                <action selector="performTextFinderAction:" target="-1" id="ilk-uO-akN"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Jump to Selection" keyEquivalent="j" id="361">
