@@ -87,22 +87,6 @@
     return ([self fileURL] != nil)? [super displayName] : [self shortTitle];
 }
 
-
-- (NSText *)textView
-{
-    return textView;
-}
-
-- (void)setupSectionPopup
-{
-    [sectionPopup removeAllItems];
-    [sectionPopup addItemWithTitle:@"Section:"];
-    [sectionPopup setEnabled:[sections count] > 0];
-
-    if ([sectionPopup isEnabled])
-        [sectionPopup addItemsWithTitles:sections];
-}
-
 - (void)addSectionHeader:(NSString *)header range:(NSRange)range
 {
     /* Make sure it is a header -- error text sometimes is not Courier, so it gets passed in here. */
@@ -134,7 +118,7 @@
 		NSColor       *textColor = [defaults manTextColor];
 		NSColor       *backgroundColor = [defaults manBackgroundColor];
 		
-		if (textView == nil || hasLoaded) return;
+		if (self.textView == nil || hasLoaded) return;
 		
 		if ([taskData isRTFData])
 		{
@@ -213,12 +197,12 @@
 				NSLog(@"Exception during formatting: %@", localException);
 			}
 			
-			[[textView layoutManager] replaceTextStorage:storage];
-			[[textView window] invalidateCursorRectsForView:textView];
+			[self.textView.layoutManager replaceTextStorage:storage];
+			[self.textView.window invalidateCursorRectsForView:self.textView];
 		}
 		
-		[textView setBackgroundColor:backgroundColor];
-		[self setupSectionPopup];
+		[self.textView setBackgroundColor:backgroundColor];
+        [self.textView.window.toolbar validateVisibleItems];
 		
 		/*
 		 * The 10.7 document reloading stuff can cause the loading methods to be invoked more than
@@ -338,16 +322,16 @@
 
     [super windowControllerDidLoadNib:windowController];
 
-    [textView setEditable:NO];
-    [textView setSelectable:YES];
-    [textView setImportsGraphics:NO];
-    [textView setRichText:YES];
-	textView.usesFindBar = YES;
+    self.textView.editable = NO;
+    self.textView.selectable = YES;
+    self.textView.importsGraphics = NO;
+    self.textView.richText = YES;
+	self.textView.usesFindBar = YES;
 
     if (sizeString != nil)
     {
         NSSize windowSize = NSSizeFromString(sizeString);
-        NSWindow *window = [textView window];
+        NSWindow *window = self.textView.window;
         NSRect frame = [window frame];
 
         if (windowSize.width > 30.0 && windowSize.height > 30.0) {
@@ -356,35 +340,36 @@
         }
     }
 
-    if ([self shortTitle] != nil)
-        [titleStringField setStringValue:[self shortTitle]];
-    [[[textView textStorage] mutableString] setString:@"Loading..."];
-    [textView setBackgroundColor:[defaults manBackgroundColor]];
-    [textView setTextColor:[defaults manTextColor]];
+    self.textView.textStorage.mutableString.string = NSLocalizedString(@"Loading…", @"Displayed in the text view while the text is loading");
+    self.textView.backgroundColor = defaults.manBackgroundColor;
+    self.textView.textColor = defaults.manTextColor;
     [self performSelector:@selector(showData) withObject:nil afterDelay:0.0];
 
-    [[textView window] makeFirstResponder:textView];
-    [[textView window] setDelegate:self];
+    [self.textView.window makeFirstResponder:self.textView];
+    [self.textView.window setDelegate:self];
 }
 
 - (IBAction)openSelection:(id)sender
 {
-    NSRange selectedRange = [textView selectedRange];
+    NSRange selectedRange = self.textView.selectedRange;
 
     if (selectedRange.length > 0)
     {
-        NSString *selectedString = [[textView string] substringWithRange:selectedRange];
+        NSString *selectedString = [self.textView.string substringWithRange:selectedRange];
         [[ManDocumentController sharedDocumentController] openString:selectedString];
     }
-    [[textView window] makeFirstResponder:textView];
+    [self.textView.window makeFirstResponder:self.textView];
 }
 
 - (IBAction)displaySection:(id)sender
 {
-    NSInteger section = [sectionPopup indexOfSelectedItem];
-    if (section > 0 && section <= [sectionRanges count]) {
-        NSRange range = [[sectionRanges objectAtIndex:section-1] rangeValue];
-        [textView scrollRangeToTop:range];
+    NSUInteger section = [sections indexOfObject:[sender title]];
+    
+    if (section != NSNotFound && section < sectionRanges.count)
+    {
+        NSRange range = sectionRanges[section].rangeValue;
+        
+        [self.textView scrollRangeToTop:range];
     }
 }
 
@@ -410,7 +395,8 @@
 
 - (IBAction)saveCurrentWindowSize:(id)sender
 {
-    NSSize size = [[textView window] frame].size;
+    CGSize size = self.textView.window.frame.size;
+    
     [[NSUserDefaults standardUserDefaults] setObject:NSStringFromSize(size) forKey:@"ManWindowSize"];
 }
 
@@ -422,7 +408,7 @@
 
 - (void)printDocumentWithSettings:(NSDictionary<NSPrintInfoAttributeKey,id> *)printSettings showPrintPanel:(BOOL)showPrintPanel delegate:(id)delegate didPrintSelector:(SEL)didPrintSelector contextInfo:(void *)contextInfo
 {
-    NSPrintOperation *operation = [NSPrintOperation printOperationWithView:textView];
+    NSPrintOperation *operation = [NSPrintOperation printOperationWithView:self.textView];
     NSPrintInfo      *printInfo = [operation printInfo];
 
     [printInfo setVerticallyCentered:NO];
@@ -431,7 +417,7 @@
     [operation setShowsPrintPanel:showPrintPanel];
     [operation setShowsProgressPanel:showPrintPanel];
 
-    [operation runOperationModalForWindow:[textView window] delegate:nil didRunSelector:NULL contextInfo:NULL];
+    [operation runOperationModalForWindow:self.textView.window delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)item
@@ -440,6 +426,80 @@
         return copyURL != nil;
 
     return [super validateMenuItem:item];
+}
+
+
+- (NSArray<NSToolbarItemIdentifier> *)toolbarAllowedItemIdentifiers:(NSToolbar *)toolbar
+{
+    // MDSectionIdentifier is an NSMenuToolbarItem. As of Xcode 12.4, these items cannot be created in xibs, and if we try to coerce an NSToolbarItem into an NSMenuToolbarItem, then the AppKit throws an exception decoding the object. So we'll have to construct it manually...
+    return @[@"MDSectionIdentifier"];
+}
+
+
+- (NSArray<NSToolbarItemIdentifier> *)toolbarDefaultItemIdentifiers:(NSToolbar *)toolbar
+{
+    return @[NSToolbarFlexibleSpaceItemIdentifier, @"MDSectionIdentifier"];
+}
+
+
+- (NSToolbarItem *)toolbar:(NSToolbar *)toolbar
+     itemForItemIdentifier:(NSToolbarItemIdentifier)itemIdentifier
+ willBeInsertedIntoToolbar:(BOOL)flag
+{
+    if ([itemIdentifier isEqualToString:@"MDSectionIdentifier"])
+    {
+        if (@available(macOS 10.15, *))
+        {
+            NSMenuToolbarItem *menuItem = [[NSMenuToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
+            
+            menuItem.title = NSLocalizedString(@"Section", @"Section");
+            menuItem.label = menuItem.title;
+            menuItem.menu = [[NSMenu alloc] initWithTitle:menuItem.title];
+            menuItem.menu.delegate = self;
+            return menuItem;
+        }
+        else
+        {
+            NSToolbarItem *menuItem = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
+            NSPopUpButton *pullDown = [[NSPopUpButton alloc] initWithFrame:CGRectZero pullsDown:YES];
+            
+            menuItem.label = NSLocalizedString(@"Section", @"Section");
+            menuItem.view = pullDown;
+            [pullDown insertItemWithTitle:menuItem.label atIndex:0L];
+            pullDown.menu.delegate = self;
+            return menuItem;
+        }
+    }
+    return nil;
+}
+
+
+- (void)menuNeedsUpdate:(NSMenu *)menu
+{
+    // Here we assume this menu is the section pull-down menu.
+    [menu removeAllItems];
+    // In an NSMenuToolbarItem, the first item in a pull-down is never actually displayed. In an NSPopUpButton, the first item in a pull-down is the pull-down's title. Either way, we need a first menu item that doesn't do anything.
+    [menu addItemWithTitle:NSLocalizedString(@"Section", @"Section") action:nil keyEquivalent:@""];
+    // Add an item for each section.
+    [sections enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [menu addItemWithTitle:obj action:@selector(displaySection:) keyEquivalent:@""];
+    }];
+    // For some reason, we lose the title if this gets called again. But since the sections are static, we have served our purpose.
+    menu.delegate = nil;
+}
+
+
+- (BOOL)validateToolbarItem:(NSToolbarItem *)item
+{
+    if ([item.itemIdentifier isEqualToString:@"MDSectionIdentifier"])
+    {
+        return sections.count > 0UL;
+    }
+    else if ([item.itemIdentifier isEqualToString:@"MDOpenSelectionIdentifier"])
+    {
+        return self.textView.selectedRange.length > 0UL;
+    }
+    return YES;
 }
 
 - (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex
@@ -478,7 +538,7 @@
 - (void)windowDidUpdate:(NSNotification *)notification
 {
     /* Disable the Open Selection button if there's no selection to work on */
-    [openSelectionButton setEnabled:([textView selectedRange].length > 0)];
+    [self.textView.window.toolbar validateVisibleItems];
 }
 
 - (BOOL)windowShouldZoom:(NSWindow *)window toFrame:(NSRect)newFrame
@@ -488,7 +548,7 @@
 
 - (NSRect)windowWillUseStandardFrame:(NSWindow *)window defaultFrame:(NSRect)newFrame
 {
-    NSScrollView *scrollView = [textView enclosingScrollView];
+    NSScrollView *scrollView = [self.textView enclosingScrollView];
     NSRect currentFrame = [window frame];
     NSRect desiredFrame;
     NSSize textSize;
@@ -496,10 +556,10 @@
     NSRect contentRect;
 
     /* Get the text's natural size */
-    textSize = [[textView textStorage] size];
-    textSize.width += ([textView textContainerInset].width * 2) + 10; //add a little extra padding
-    [textView sizeToFit];
-    textSize.height = NSHeight([textView frame]); //this seems to be more accurate
+    textSize = self.textView.textStorage.size;
+    textSize.width += (self.textView.textContainerInset.width * 2) + 10; //add a little extra padding
+    [self.textView sizeToFit];
+    textSize.height = NSHeight(self.textView.frame); //this seems to be more accurate
 
     /* Get the size the scrollView should be based on that */
     scrollRect.origin = NSZeroPoint;
@@ -552,8 +612,6 @@
         [self readFromURL:url ofType:type error:NULL];
     }
 
-    if ([self shortTitle] != nil)
-        [titleStringField setStringValue:[self shortTitle]];
     [[self windowControllers] makeObjectsPerformSelector:@selector(synchronizeWindowTitleWithDocumentName)];
 }
 

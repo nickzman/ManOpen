@@ -6,26 +6,21 @@
 @class ManTextView;
 @class NSTextField, NSText, NSButton, NSPopUpButton;
 
-@interface ManDocument : NSDocument <NSWindowDelegate>
+@interface ManDocument : NSDocument <NSMenuDelegate, NSToolbarDelegate, NSWindowDelegate>
 {
     NSData *taskData;
     BOOL hasLoaded;
     NSURL *copyURL;
-    NSMutableArray *sections;
-    NSMutableArray *sectionRanges;
+    NSMutableArray<NSString *> *sections;
+    NSMutableArray<NSValue *> *sectionRanges;
     NSMutableDictionary *restoreData;
-
-    IBOutlet ManTextView *textView;
-    IBOutlet NSTextField *titleStringField;
-    IBOutlet NSButton    *openSelectionButton;
-    IBOutlet NSPopUpButton *sectionPopup;
 }
 
 - (instancetype)initWithName:(NSString *)name section:(NSString *)section manPath:(NSString *)manPath title:(NSString *)title;
 
 @property(nonatomic,retain) NSString *shortTitle;
 
-- (NSText *)textView;
+@property(nonatomic,retain) IBOutlet ManTextView *textView;
 
 - (void)loadCommand:(NSString *)command;
 
