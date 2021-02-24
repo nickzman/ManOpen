@@ -59,6 +59,8 @@
 		E0494B3325E1DA3E00F0A452 /* PrefPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2925E1DA3E00F0A452 /* PrefPanel.xib */; };
 		E0494B3425E1DA3E00F0A452 /* Apropos.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2B25E1DA3E00F0A452 /* Apropos.xib */; };
 		E0494B3625E1DA3E00F0A452 /* DocController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2F25E1DA3E00F0A452 /* DocController.xib */; };
+		E0F6EC4C25E5C7EF0042529C /* ManWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = E0F6EC4A25E5C7EF0042529C /* ManWindowController.h */; };
+		E0F6EC4D25E5C7EF0042529C /* ManWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E0F6EC4B25E5C7EF0042529C /* ManWindowController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -154,6 +156,8 @@
 		E0494B2A25E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PrefPanel.xib; sourceTree = "<group>"; };
 		E0494B2C25E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/Apropos.xib; sourceTree = "<group>"; };
 		E0494B3025E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/DocController.xib; sourceTree = "<group>"; };
+		E0F6EC4A25E5C7EF0042529C /* ManWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManWindowController.h; sourceTree = "<group>"; };
+		E0F6EC4B25E5C7EF0042529C /* ManWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ManWindowController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -253,6 +257,7 @@
 				D39278F20821FFA400376676 /* AproposDocument.m */,
 				D39278F60821FFA400376676 /* ManDocument.m */,
 				D39278F80821FFA400376676 /* ManDocumentController.m */,
+				E0F6EC4B25E5C7EF0042529C /* ManWindowController.m */,
 				D39278FA0821FFA400376676 /* NSData+Utils.m */,
 				D39278FC0821FFA400376676 /* PrefPanelController.m */,
 			);
@@ -266,6 +271,7 @@
 				D39279030821FFA400376676 /* ManDocument.h */,
 				D39279050821FFA400376676 /* ManDocumentController.h */,
 				D39279070821FFA400376676 /* ManOpenProtocol.h */,
+				E0F6EC4A25E5C7EF0042529C /* ManWindowController.h */,
 				D39279090821FFA400376676 /* NSData+Utils.h */,
 				D392790B0821FFA400376676 /* PrefPanelController.h */,
 				D392790D0821FFA400376676 /* SystemType.h */,
@@ -426,6 +432,7 @@
 				D38A240314E4C3FE00F6AFFE /* AproposDocument.h in Headers */,
 				D38A240514E4C3FE00F6AFFE /* ManDocument.h in Headers */,
 				D38A240614E4C3FE00F6AFFE /* ManDocumentController.h in Headers */,
+				E0F6EC4C25E5C7EF0042529C /* ManWindowController.h in Headers */,
 				D38A240714E4C3FE00F6AFFE /* ManOpenProtocol.h in Headers */,
 				D38A240814E4C3FE00F6AFFE /* NSData+Utils.h in Headers */,
 				D38A240914E4C3FE00F6AFFE /* PrefPanelController.h in Headers */,
@@ -635,6 +642,7 @@
 			files = (
 				D38A241B14E4C3FE00F6AFFE /* AproposDocument.m in Sources */,
 				D38A241D14E4C3FE00F6AFFE /* ManDocument.m in Sources */,
+				E0F6EC4D25E5C7EF0042529C /* ManWindowController.m in Sources */,
 				D38A241E14E4C3FE00F6AFFE /* ManDocumentController.m in Sources */,
 				D38A241F14E4C3FE00F6AFFE /* NSData+Utils.m in Sources */,
 				D38A242014E4C3FE00F6AFFE /* PrefPanelController.m in Sources */,

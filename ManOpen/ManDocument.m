@@ -4,11 +4,7 @@
 #import "ManDocumentController.h"
 #import "PrefPanelController.h"
 #import "NSData+Utils.h"
-
-
-@interface ManTextView : NSTextView
-- (void)scrollRangeToTop:(NSRange)charRange;
-@end
+#import "ManWindowController.h"
 
 #define RestoreWindowDict @"RestoreWindowInfo"
 #define RestoreSection    @"Section"
@@ -43,14 +39,14 @@
     if (section && [section length] > 0)
     {
         [command appendFormat:@" %@", [section lowercaseString]];
-        copyURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"x-man-doc://%@/%@", section, title]];
+        self.xManDocURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"x-man-doc://%@/%@", section, title]];
     }
     else
     {
-        copyURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"x-man-doc://%@", title]];
+        self.xManDocURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"x-man-doc://%@", title]];
     }
     
-    restoreData = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+    self.restoreData = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                    name,    RestoreName,
                    title,   RestoreTitle,
                    section, RestoreSection,
@@ -73,9 +69,11 @@
 }
 
 
-- (NSString *)windowNibName
+- (void)makeWindowControllers
 {
-    return @"ManPage";
+    ManWindowController *controller = [[ManWindowController alloc] initWithWindowNibName:@"ManPage"];
+    
+    [self addWindowController:controller];
 }
 
 /*
@@ -97,13 +95,13 @@
         int count = 1;
 
         /* Check for dups (e.g. lesskey(1) ) */
-        while ([sections containsObject:label]) {
+        while ([self.sections containsObject:label]) {
             count++;
             label = [NSString stringWithFormat:@"%@ [%d]", header, count];
         }
 
-        [sections addObject:label];
-        [sectionRanges addObject:[NSValue valueWithRange:range]];
+        [self.sections addObject:label];
+        [self.sectionRanges addObject:[NSValue valueWithRange:range]];
     }
 }
 
@@ -117,16 +115,17 @@
 		NSColor       *linkColor = [defaults manLinkColor];
 		NSColor       *textColor = [defaults manTextColor];
 		NSColor       *backgroundColor = [defaults manBackgroundColor];
+        ManWindowController *manWC = self.windowControllers.firstObject;
 		
-		if (self.textView == nil || hasLoaded) return;
+		if (manWC.textView == nil || self.hasLoaded) return;
 		
-		if ([taskData isRTFData])
+		if ([self.taskData isRTFData])
 		{
-			storage = [[NSTextStorage alloc] initWithRTF:taskData documentAttributes:NULL];
+			storage = [[NSTextStorage alloc] initWithRTF:self.taskData documentAttributes:NULL];
 		}
-		else if (taskData != nil)
+		else if (self.taskData != nil)
 		{
-			storage = [[NSTextStorage alloc] initWithHTML:taskData documentAttributes:NULL];
+			storage = [[NSTextStorage alloc] initWithHTML:self.taskData documentAttributes:NULL];
 		}
 		
 		if (storage == nil)
@@ -137,12 +136,12 @@
 			[[storage mutableString] setString:@"\nNo manual entry."];
 		}
 		
-		if (sections == nil) {
-			sections = [[NSMutableArray alloc] init];
-			sectionRanges = [[NSMutableArray alloc] init];
+		if (self.sections == nil) {
+			self.sections = [[NSMutableArray alloc] init];
+			self.sectionRanges = [[NSMutableArray alloc] init];
 		}
-		[sections removeAllObjects];
-		[sectionRanges removeAllObjects];
+		[self.sections removeAllObjects];
+		[self.sectionRanges removeAllObjects];
 		
 		/* Convert the attributed string to use the user's chosen font and text color */
 		if (storage != nil)
@@ -197,12 +196,12 @@
 				NSLog(@"Exception during formatting: %@", localException);
 			}
 			
-			[self.textView.layoutManager replaceTextStorage:storage];
-			[self.textView.window invalidateCursorRectsForView:self.textView];
+			[manWC.textView.layoutManager replaceTextStorage:storage];
+			[manWC.textView.window invalidateCursorRectsForView:manWC.textView];
 		}
 		
-		[self.textView setBackgroundColor:backgroundColor];
-        [self.textView.window.toolbar validateVisibleItems];
+		[manWC.textView setBackgroundColor:backgroundColor];
+        [manWC.textView.window.toolbar validateVisibleItems];
 		
 		/*
 		 * The 10.7 document reloading stuff can cause the loading methods to be invoked more than
@@ -210,11 +209,11 @@
 		 * some overkill code elsewhere on my part, but putting in the hadLoaded guard to only
 		 * avoid doing anything after we have loaded real data seems to help.
 		 */
-		if (taskData != nil)
-			hasLoaded = YES;
+		if (self.taskData != nil)
+			self.hasLoaded = YES;
 		
 		// no need to keep around rtf data
-		taskData = nil;
+        self.taskData = nil;
 	}
 }
 
@@ -241,8 +240,8 @@
     ManDocumentController *docController = [ManDocumentController sharedDocumentController];
     NSString *fullCommand = [NSString stringWithFormat:@"%@ | %@", command, [self filterCommand]];
 	
-    taskData = nil;
-    taskData = [docController dataByExecutingCommand:fullCommand];
+    self.taskData = nil;
+    self.taskData = [docController dataByExecutingCommand:fullCommand];
 
     [self showData];
 }
@@ -297,14 +296,14 @@
 
     // strip extension twice in case it is a e.g. "1.gz" filename
     [self setShortTitle:[[[[url path] lastPathComponent] stringByDeletingPathExtension] stringByDeletingPathExtension]];
-	copyURL = url;
+    self.xManDocURL = url;
     
-    restoreData = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+    self.restoreData = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                    url,    RestoreFileURL,
                    type,   RestoreFileType,
                    nil];
 
-    if (taskData == nil)
+    if (self.taskData == nil)
     {
         NSDictionary *errorDetail = [NSDictionary dictionaryWithObject:@"Could not read manual data" forKey:NSLocalizedDescriptionKey];
         if (error != NULL)
@@ -315,91 +314,6 @@
     return YES;
 }
 
-- (void)windowControllerDidLoadNib:(NSWindowController *)windowController
-{
-    NSString *sizeString = [[NSUserDefaults standardUserDefaults] stringForKey:@"ManWindowSize"];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-
-    [super windowControllerDidLoadNib:windowController];
-
-    self.textView.editable = NO;
-    self.textView.selectable = YES;
-    self.textView.importsGraphics = NO;
-    self.textView.richText = YES;
-	self.textView.usesFindBar = YES;
-
-    if (sizeString != nil)
-    {
-        NSSize windowSize = NSSizeFromString(sizeString);
-        NSWindow *window = self.textView.window;
-        NSRect frame = [window frame];
-
-        if (windowSize.width > 30.0 && windowSize.height > 30.0) {
-            frame.size = windowSize;
-            [window setFrame:frame display:NO];
-        }
-    }
-
-    self.textView.textStorage.mutableString.string = NSLocalizedString(@"Loading…", @"Displayed in the text view while the text is loading");
-    self.textView.backgroundColor = defaults.manBackgroundColor;
-    self.textView.textColor = defaults.manTextColor;
-    [self performSelector:@selector(showData) withObject:nil afterDelay:0.0];
-
-    [self.textView.window makeFirstResponder:self.textView];
-    [self.textView.window setDelegate:self];
-}
-
-- (IBAction)openSelection:(id)sender
-{
-    NSRange selectedRange = self.textView.selectedRange;
-
-    if (selectedRange.length > 0)
-    {
-        NSString *selectedString = [self.textView.string substringWithRange:selectedRange];
-        [[ManDocumentController sharedDocumentController] openString:selectedString];
-    }
-    [self.textView.window makeFirstResponder:self.textView];
-}
-
-- (IBAction)displaySection:(id)sender
-{
-    NSUInteger section = [sections indexOfObject:[sender title]];
-    
-    if (section != NSNotFound && section < sectionRanges.count)
-    {
-        NSRange range = sectionRanges[section].rangeValue;
-        
-        [self.textView scrollRangeToTop:range];
-    }
-}
-
-- (IBAction)copyURL:(id)sender
-{
-    if (copyURL != nil)
-    {
-        NSPasteboard *pb = [NSPasteboard generalPasteboard];
-        NSMutableArray *types = [NSMutableArray array];
-        
-        [types addObject:NSURLPboardType];
-        if ([copyURL isFileURL])
-            [types addObject:NSFilenamesPboardType];
-        [types addObject:NSStringPboardType];
-        [pb declareTypes:types owner:nil];
-
-        [copyURL writeToPasteboard:pb];
-        [pb setString:[NSString stringWithFormat:@"<%@>", [copyURL absoluteString]] forType:NSStringPboardType];
-        if ([copyURL isFileURL])
-            [pb setPropertyList:[NSArray arrayWithObject:[copyURL path]] forType:NSFilenamesPboardType];
-    }
-}
-
-- (IBAction)saveCurrentWindowSize:(id)sender
-{
-    CGSize size = self.textView.window.frame.size;
-    
-    [[NSUserDefaults standardUserDefaults] setObject:NSStringFromSize(size) forKey:@"ManWindowSize"];
-}
-
 /* Always use global page layout */
 - (IBAction)runPageLayout:(id)sender
 {
@@ -408,7 +322,8 @@
 
 - (void)printDocumentWithSettings:(NSDictionary<NSPrintInfoAttributeKey,id> *)printSettings showPrintPanel:(BOOL)showPrintPanel delegate:(id)delegate didPrintSelector:(SEL)didPrintSelector contextInfo:(void *)contextInfo
 {
-    NSPrintOperation *operation = [NSPrintOperation printOperationWithView:self.textView];
+    ManWindowController *manWC = self.windowControllers.firstObject;
+    NSPrintOperation *operation = [NSPrintOperation printOperationWithView:manWC.textView];
     NSPrintInfo      *printInfo = [operation printInfo];
 
     [printInfo setVerticallyCentered:NO];
@@ -417,173 +332,14 @@
     [operation setShowsPrintPanel:showPrintPanel];
     [operation setShowsProgressPanel:showPrintPanel];
 
-    [operation runOperationModalForWindow:self.textView.window delegate:nil didRunSelector:NULL contextInfo:NULL];
+    [operation runOperationModalForWindow:manWC.window delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
-- (BOOL)validateMenuItem:(NSMenuItem *)item
-{
-    if ([item action] == @selector(copyURL:))
-        return copyURL != nil;
-
-    return [super validateMenuItem:item];
-}
-
-
-- (NSArray<NSToolbarItemIdentifier> *)toolbarAllowedItemIdentifiers:(NSToolbar *)toolbar
-{
-    // MDSectionIdentifier is an NSMenuToolbarItem. As of Xcode 12.4, these items cannot be created in xibs, and if we try to coerce an NSToolbarItem into an NSMenuToolbarItem, then the AppKit throws an exception decoding the object. So we'll have to construct it manually...
-    return @[@"MDSectionIdentifier"];
-}
-
-
-- (NSArray<NSToolbarItemIdentifier> *)toolbarDefaultItemIdentifiers:(NSToolbar *)toolbar
-{
-    return @[NSToolbarFlexibleSpaceItemIdentifier, @"MDSectionIdentifier"];
-}
-
-
-- (NSToolbarItem *)toolbar:(NSToolbar *)toolbar
-     itemForItemIdentifier:(NSToolbarItemIdentifier)itemIdentifier
- willBeInsertedIntoToolbar:(BOOL)flag
-{
-    if ([itemIdentifier isEqualToString:@"MDSectionIdentifier"])
-    {
-        if (@available(macOS 10.15, *))
-        {
-            NSMenuToolbarItem *menuItem = [[NSMenuToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-            
-            menuItem.title = NSLocalizedString(@"Section", @"Section");
-            menuItem.label = menuItem.title;
-            menuItem.menu = [[NSMenu alloc] initWithTitle:menuItem.title];
-            menuItem.menu.delegate = self;
-            return menuItem;
-        }
-        else
-        {
-            NSToolbarItem *menuItem = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-            NSPopUpButton *pullDown = [[NSPopUpButton alloc] initWithFrame:CGRectZero pullsDown:YES];
-            
-            menuItem.label = NSLocalizedString(@"Section", @"Section");
-            menuItem.view = pullDown;
-            [pullDown insertItemWithTitle:menuItem.label atIndex:0L];
-            pullDown.menu.delegate = self;
-            return menuItem;
-        }
-    }
-    return nil;
-}
-
-
-- (void)menuNeedsUpdate:(NSMenu *)menu
-{
-    // Here we assume this menu is the section pull-down menu.
-    [menu removeAllItems];
-    // In an NSMenuToolbarItem, the first item in a pull-down is never actually displayed. In an NSPopUpButton, the first item in a pull-down is the pull-down's title. Either way, we need a first menu item that doesn't do anything.
-    [menu addItemWithTitle:NSLocalizedString(@"Section", @"Section") action:nil keyEquivalent:@""];
-    // Add an item for each section.
-    [sections enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [menu addItemWithTitle:obj action:@selector(displaySection:) keyEquivalent:@""];
-    }];
-    // For some reason, we lose the title if this gets called again. But since the sections are static, we have served our purpose.
-    menu.delegate = nil;
-}
-
-
-- (BOOL)validateToolbarItem:(NSToolbarItem *)item
-{
-    if ([item.itemIdentifier isEqualToString:@"MDSectionIdentifier"])
-    {
-        return sections.count > 0UL;
-    }
-    else if ([item.itemIdentifier isEqualToString:@"MDOpenSelectionIdentifier"])
-    {
-        return self.textView.selectedRange.length > 0UL;
-    }
-    return YES;
-}
-
-- (BOOL)textView:(NSTextView *)aTextView clickedOnLink:(id)link atIndex:(unsigned)charIndex
-{
-    NSString *page = nil;
-
-    /* On Tiger, NSURL, Panther and before, NSString */
-    if ([link isKindOfClass:[NSString class]] && [link hasPrefix:@"manpage:"])
-        page = [link substringFromIndex:8];
-    if ([link isKindOfClass:[NSURL class]])
-        page = [link resourceSpecifier];
-
-    if (page == nil)
-        return NO;
-    [[ManDocumentController sharedDocumentController] openString:page];
-    return YES;
-}
-
-- (void)textView:(NSTextView *)textView clickedOnCell:(id <NSTextAttachmentCell>)cell inRect:(NSRect)cellFrame
-{
-    NSString *filename = nil;
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    /* NSHelpAttachment stores the string in the fileName variable */
-    if ([[cell attachment] respondsToSelector:@selector(fileName)])
-        filename = [(id)[cell attachment] fileName];
-#pragma clang diagnostic pop
-
-    if ([filename hasPrefix:@"manpage:"]) {
-        filename = [filename substringFromIndex:8];
-        [[ManDocumentController sharedDocumentController] openString:filename];
-    }
-}
-
-- (void)windowDidUpdate:(NSNotification *)notification
-{
-    /* Disable the Open Selection button if there's no selection to work on */
-    [self.textView.window.toolbar validateVisibleItems];
-}
-
-- (BOOL)windowShouldZoom:(NSWindow *)window toFrame:(NSRect)newFrame
-{
-    return YES;
-}
-
-- (NSRect)windowWillUseStandardFrame:(NSWindow *)window defaultFrame:(NSRect)newFrame
-{
-    NSScrollView *scrollView = [self.textView enclosingScrollView];
-    NSRect currentFrame = [window frame];
-    NSRect desiredFrame;
-    NSSize textSize;
-    NSRect scrollRect;
-    NSRect contentRect;
-
-    /* Get the text's natural size */
-    textSize = self.textView.textStorage.size;
-    textSize.width += (self.textView.textContainerInset.width * 2) + 10; //add a little extra padding
-    [self.textView sizeToFit];
-    textSize.height = NSHeight(self.textView.frame); //this seems to be more accurate
-
-    /* Get the size the scrollView should be based on that */
-    scrollRect.origin = NSZeroPoint;
-	scrollRect.size = [NSScrollView frameSizeForContentSize:textSize horizontalScrollerClass:scrollView.horizontalScroller.class verticalScrollerClass:scrollView.verticalScroller.class borderType:scrollView.borderType controlSize:scrollView.verticalScroller.controlSize scrollerStyle:scrollView.verticalScroller.scrollerStyle];
-
-    /* Get the window's content size -- basically the scrollView size plus our title area */
-    contentRect = scrollRect;
-    contentRect.size.height += NSHeight([[window contentView] frame]) - NSHeight([scrollView frame]);
-
-    /* Get the desired window frame size */
-    desiredFrame = [NSWindow frameRectForContentRect:contentRect styleMask:[window styleMask]];
-
-    /* Set the origin based on window's current location */
-    desiredFrame.origin.x = currentFrame.origin.x;
-    desiredFrame.origin.y = NSMaxY(currentFrame) - NSHeight(desiredFrame);
-
-    /* NSWindow will clip this rect to the actual available screen area */
-    return desiredFrame;
-}
 
 - (void)encodeRestorableStateWithCoder:(NSCoder *)coder
 {
     [super encodeRestorableStateWithCoder:coder];
-    [coder encodeObject:restoreData forKey:RestoreWindowDict];
+    [coder encodeObject:self.restoreData forKey:RestoreWindowDict];
 }
 
 - (void)restoreStateWithCoder:(NSCoder *)coder
@@ -605,7 +361,7 @@
     }
     /* Usually, URL-backed documents have been automatically restored already
        (the copyURL would be set), but just in case... */
-    else if ([restoreInfo objectForKey:RestoreFileURL] != nil && copyURL == nil)
+    else if ([restoreInfo objectForKey:RestoreFileURL] != nil && self.xManDocURL == nil)
     {
         NSURL *url = [restoreInfo objectForKey:RestoreFileURL];
         NSString *type  = [restoreInfo objectForKey:RestoreFileType];
@@ -613,124 +369,6 @@
     }
 
     [[self windowControllers] makeObjectsPerformSelector:@selector(synchronizeWindowTitleWithDocumentName)];
-}
-
-@end
-
-
-@implementation ManTextView
-
-static NSCursor *linkCursor = nil;
-
-+ (void)initialize
-{
-    NSImage *linkImage;
-    NSString *path;
-
-    path = [[NSBundle mainBundle] pathForResource:@"LinkCursor" ofType:@"tiff"];
-    linkImage = [[NSImage alloc] initWithContentsOfFile: path];
-    linkCursor = [[NSCursor alloc] initWithImage:linkImage hotSpot:NSMakePoint(6.0f, 1.0f)];
-    [linkCursor setOnMouseEntered:YES];
-}
-
-- (void)resetCursorRects
-{
-    NSTextContainer *container = [self textContainer];
-    NSLayoutManager *layout    = [self layoutManager];
-    NSTextStorage *storage     = [self textStorage];
-    NSRect visible = [self visibleRect];
-    NSUInteger currIndex = 0;
-
-    [super resetCursorRects];
-
-    while (currIndex < [storage length])
-    {
-        NSRange currRange;
-        NSDictionary *attribs = [storage attributesAtIndex:currIndex effectiveRange:&currRange];
-        BOOL isLinkSection = [attribs objectForKey:NSLinkAttributeName] != nil;
-
-        if (isLinkSection)
-        {
-            NSRect *rects;
-            NSRange ignoreRange = {NSNotFound, 0};
-            NSUInteger i, rectCount = 0;
-
-            rects = [layout rectArrayForCharacterRange:currRange
-                            withinSelectedCharacterRange:ignoreRange
-                            inTextContainer:container
-                            rectCount:&rectCount];
-
-            for (i=0; i<rectCount; i++)
-                if (NSIntersectsRect(visible, rects[i]))
-                    [self addCursorRect:rects[i] cursor:linkCursor];
-        }
-
-        currIndex = NSMaxRange(currRange);
-    }
-}
-
-- (void)scrollRangeToTop:(NSRange)charRange
-{
-    NSLayoutManager *layout = [self layoutManager];
-    NSRange glyphRange = [layout glyphRangeForCharacterRange:charRange actualCharacterRange:NULL];
-    NSRect rect = [layout boundingRectForGlyphRange:glyphRange inTextContainer:[self textContainer]];
-    CGFloat height = NSHeight([self visibleRect]);
-
-    if (height > 0)
-        rect.size.height = height;
-
-    [self scrollRectToVisible:rect];
-}
-
-/* Make space page down (and shift/alt-space page up) */
-- (void)keyDown:(NSEvent *)event
-{
-    if ([[event charactersIgnoringModifiers] isEqual:@" "])
-    {
-         if ([event modifierFlags] & (NSShiftKeyMask|NSAlternateKeyMask))
-             [self pageUp:self];
-         else
-             [self pageDown:self];
-    }
-    else
-    {
-        [super keyDown:event];
-    }
-}
-
-/* 
- * Draw page numbers when printing. Under early versions of MacOS X... the normal
- * NSString drawing methods don't work in the context of this method. So, I fell back on
- * CoreGraphics primitives, which did. However, I'm now just supporting Tiger (10.4) and up,
- * and it looks like the bugs have been fixed, so we can just use the higher-level
- * NSStringDrawing now, thankfully.
- */
-- (void)drawPageBorderWithSize:(NSSize)size
-{
-    NSFont *font = [[NSUserDefaults standardUserDefaults] manFont];
-    NSInteger currPage = [[NSPrintOperation currentOperation] currentPage];
-    NSString *pageString = [NSString stringWithFormat:@"%d", (int)currPage];
-	NSMutableParagraphStyle *style = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
-    NSMutableDictionary *drawAttribs = [NSMutableDictionary dictionary];
-    NSRect drawRect = NSMakeRect(0.0f, 0.0f, size.width, 20.0f + [font ascender]);
-
-    [style setAlignment:NSCenterTextAlignment];
-    [drawAttribs setObject:style forKey:NSParagraphStyleAttributeName];
-    [drawAttribs setObject:font forKey:NSFontAttributeName];
-
-    [pageString drawInRect:drawRect withAttributes:drawAttribs];
-    
-//    CGFloat strWidth = [str sizeWithAttributes:attribs].width;
-//    NSPoint point = NSMakePoint(size.width/2 - strWidth/2, 20.0f);
-//    CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
-//    
-//    CGContextSaveGState(context);
-//    CGContextSetTextMatrix(context, CGAffineTransformIdentity);
-//    CGContextSetTextDrawingMode(context, kCGTextFill);  //needed?
-//    CGContextSetGrayFillColor(context, 0.0f, 1.0f);
-//    CGContextSelectFont(context, [[font fontName] cStringUsingEncoding:NSMacOSRomanStringEncoding], [font pointSize], kCGEncodingMacRoman);
-//    CGContextShowTextAtPoint(context, point.x, point.y, [str cStringUsingEncoding:NSMacOSRomanStringEncoding], [str lengthOfBytesUsingEncoding:NSMacOSRomanStringEncoding]);
-//    CGContextRestoreGState(context);
 }
 
 @end

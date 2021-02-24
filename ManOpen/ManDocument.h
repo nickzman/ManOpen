@@ -1,32 +1,21 @@
 
 #import "SystemType.h"
-#import <AppKit/AppKit.h>
+#import <Cocoa/Cocoa.h>
 
-@class NSMutableArray, NSMutableDictionary;
-@class ManTextView;
-@class NSTextField, NSText, NSButton, NSPopUpButton;
-
-@interface ManDocument : NSDocument <NSMenuDelegate, NSToolbarDelegate, NSWindowDelegate>
-{
-    NSData *taskData;
-    BOOL hasLoaded;
-    NSURL *copyURL;
-    NSMutableArray<NSString *> *sections;
-    NSMutableArray<NSValue *> *sectionRanges;
-    NSMutableDictionary *restoreData;
-}
+@interface ManDocument : NSDocument
 
 - (instancetype)initWithName:(NSString *)name section:(NSString *)section manPath:(NSString *)manPath title:(NSString *)title;
 
 @property(nonatomic,retain) NSString *shortTitle;
-
-@property(nonatomic,retain) IBOutlet ManTextView *textView;
+@property(nonatomic,retain) NSData *taskData;
+@property(nonatomic,assign) BOOL hasLoaded;
+@property(nonatomic,retain) NSURL *xManDocURL;
+@property(nonatomic,retain) NSMutableArray<NSString *> *sections;
+@property(nonatomic,retain) NSMutableArray<NSValue *> *sectionRanges;
+@property(nonatomic,retain) NSMutableDictionary<NSString *, NSString *> *restoreData;
 
 - (void)loadCommand:(NSString *)command;
 
-- (IBAction)saveCurrentWindowSize:(id)sender;
-- (IBAction)openSelection:(id)sender;
-- (IBAction)displaySection:(id)sender;
-- (IBAction)copyURL:(id)sender;
+- (void)showData;
 
 @end
