@@ -33,7 +33,7 @@
     if (sizeString != nil)
     {
         NSSize windowSize = NSSizeFromString(sizeString);
-        NSWindow *window = self.textView.window;
+        NSWindow *window = self.window;
         NSRect frame = [window frame];
 
         if (windowSize.width > 30.0 && windowSize.height > 30.0) {
@@ -47,8 +47,8 @@
     self.textView.textColor = defaults.manTextColor;
     [self.document performSelector:@selector(showData) withObject:nil afterDelay:0.0];
 
-    [self.textView.window makeFirstResponder:self.textView];
-    [self.textView.window setDelegate:self];
+    [self.window makeFirstResponder:self.textView];
+    [self.window setDelegate:self];
 }
 
 
@@ -64,7 +64,7 @@
         NSString *selectedString = [self.textView.string substringWithRange:selectedRange];
         [[ManDocumentController sharedDocumentController] openString:selectedString];
     }
-    [self.textView.window makeFirstResponder:self.textView];
+    [self.window makeFirstResponder:self.textView];
 }
 
 - (IBAction)displaySection:(id)sender
@@ -104,7 +104,7 @@
 
 - (IBAction)saveCurrentWindowSize:(id)sender
 {
-    CGSize size = self.textView.window.frame.size;
+    CGSize size = self.window.frame.size;
     
     [[NSUserDefaults standardUserDefaults] setObject:NSStringFromSize(size) forKey:@"ManWindowSize"];
 }
@@ -234,7 +234,7 @@
 - (void)windowDidUpdate:(NSNotification *)notification
 {
     /* Disable the Open Selection button if there's no selection to work on */
-    [self.textView.window.toolbar validateVisibleItems];
+    [self.window.toolbar validateVisibleItems];
 }
 
 - (BOOL)windowShouldZoom:(NSWindow *)window toFrame:(NSRect)newFrame
