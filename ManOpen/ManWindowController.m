@@ -115,8 +115,7 @@
 {
     if ([item action] == @selector(copyURL:))
         return ((ManDocument *)self.document).xManDocURL != nil;
-
-    return [super validateMenuItem:item];
+    return YES;
 }
 
 
