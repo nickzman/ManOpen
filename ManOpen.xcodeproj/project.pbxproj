@@ -882,7 +882,6 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "ManOpen/Info-ManOpen.plist";
-				INSTALL_PATH = "$(HOME)/Apps";
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -913,7 +912,6 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "ManOpen/Info-ManOpen.plist";
-				INSTALL_PATH = "$(HOME)/Apps";
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -947,6 +945,7 @@
 				PRODUCT_NAME = cat2rtf;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SECTORDER_FLAGS = "";
+				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -971,6 +970,7 @@
 				PRODUCT_NAME = cat2rtf;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SECTORDER_FLAGS = "";
+				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -996,6 +996,7 @@
 				PRODUCT_NAME = cat2html;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SECTORDER_FLAGS = "";
+				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1020,6 +1021,7 @@
 				PRODUCT_NAME = cat2html;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SECTORDER_FLAGS = "";
+				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1045,7 +1047,7 @@
 				PRODUCT_NAME = openman;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SECTORDER_FLAGS = "";
-				SKIP_INSTALL = NO;
+				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1072,7 +1074,7 @@
 				PRODUCT_NAME = openman;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SECTORDER_FLAGS = "";
-				SKIP_INSTALL = NO;
+				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
