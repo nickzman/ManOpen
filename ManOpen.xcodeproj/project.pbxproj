@@ -148,7 +148,7 @@
 		D39279810821FFA400376676 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		D39279850821FFA400376676 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		D3EA5B5914E8DA3700AB000A /* helpQMark.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = helpQMark.tiff; sourceTree = "<group>"; };
-		E0494B0725E1C2CF00F0A452 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = "ManOpen (Application)/Images.xcassets"; sourceTree = "<group>"; };
+		E0494B0725E1C2CF00F0A452 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = ManOpen/Images.xcassets; sourceTree = SOURCE_ROOT; };
 		E0494B1925E1C3FF00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		E0494B1A25E1C3FF00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		E0494B2625E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ManPage.xib; sourceTree = "<group>"; };
@@ -156,6 +156,7 @@
 		E0494B2A25E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PrefPanel.xib; sourceTree = "<group>"; };
 		E0494B2C25E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/Apropos.xib; sourceTree = "<group>"; };
 		E0494B3025E1DA3E00F0A452 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/DocController.xib; sourceTree = "<group>"; };
+		E06A7CF025E8CF41003151C4 /* ManOpen.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = ManOpen.entitlements; path = ManOpen/ManOpen.entitlements; sourceTree = SOURCE_ROOT; };
 		E0F6EC4A25E5C7EF0042529C /* ManWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManWindowController.h; sourceTree = "<group>"; };
 		E0F6EC4B25E5C7EF0042529C /* ManWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ManWindowController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -200,7 +201,6 @@
 		D39278DB0821FF9D00376676 /* ManOpen */ = {
 			isa = PBXGroup;
 			children = (
-				E0494B0725E1C2CF00F0A452 /* Images.xcassets */,
 				D39278E00821FFA400376676 /* Supporting Files */,
 				D39278E40821FFA400376676 /* Subprojects */,
 				D39279800821FFA400376676 /* External Frameworks and Libraries */,
@@ -312,6 +312,7 @@
 		D392792E0821FFA400376676 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				E0494B0725E1C2CF00F0A452 /* Images.xcassets */,
 				D392792F0821FFA400376676 /* ManOpen.scriptSuite */,
 				D39279330821FFA400376676 /* ManOpen.scriptTerminology */,
 				D39279350821FFA400376676 /* Credits.rtf */,
@@ -323,6 +324,7 @@
 		D392793B0821FFA400376676 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				E06A7CF025E8CF41003151C4 /* ManOpen.entitlements */,
 				D38A242C14E4C3FE00F6AFFE /* Info-ManOpen.plist */,
 			);
 			name = "Supporting Files";
@@ -464,9 +466,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		D38A23FD14E4C3FE00F6AFFE /* ManOpen (Application) */ = {
+		D38A23FD14E4C3FE00F6AFFE /* ManOpen */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D38A242914E4C3FE00F6AFFE /* Build configuration list for PBXNativeTarget "ManOpen (Application)" */;
+			buildConfigurationList = D38A242914E4C3FE00F6AFFE /* Build configuration list for PBXNativeTarget "ManOpen" */;
 			buildPhases = (
 				D38A240214E4C3FE00F6AFFE /* Headers */,
 				D38A240B14E4C3FE00F6AFFE /* Resources */,
@@ -481,7 +483,7 @@
 				D38A245814E4C3FE00F6AFFE /* PBXTargetDependency */,
 				D38A245A14E4C3FE00F6AFFE /* PBXTargetDependency */,
 			);
-			name = "ManOpen (Application)";
+			name = ManOpen;
 			productInstallPath = "$(HOME)/Apps";
 			productName = "ManOpen (Application)";
 			productReference = D38A242D14E4C3FE00F6AFFE /* ManOpen.app */;
@@ -573,7 +575,7 @@
 			projectRoot = "";
 			targets = (
 				D38A23F314E4C3FE00F6AFFE /* ManOpen (Aggregate) */,
-				D38A23FD14E4C3FE00F6AFFE /* ManOpen (Application) */,
+				D38A23FD14E4C3FE00F6AFFE /* ManOpen */,
 				D38A242F14E4C3FE00F6AFFE /* cat2rtf (Tool) */,
 				D38A243A14E4C3FE00F6AFFE /* cat2html (Tool) */,
 				D38A244614E4C3FE00F6AFFE /* openman (Tool) */,
@@ -679,7 +681,7 @@
 /* Begin PBXTargetDependency section */
 		D38A245414E4C3FE00F6AFFE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D38A23FD14E4C3FE00F6AFFE /* ManOpen (Application) */;
+			target = D38A23FD14E4C3FE00F6AFFE /* ManOpen */;
 			targetProxy = D38A245314E4C3FE00F6AFFE /* PBXContainerItemProxy */;
 		};
 		D38A245814E4C3FE00F6AFFE /* PBXTargetDependency */ = {
@@ -782,6 +784,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -820,6 +823,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -874,10 +878,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = ManOpen/ManOpen.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = 8D98N325TG;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "";
@@ -904,10 +910,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = ManOpen/ManOpen.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = YES;
 				DEVELOPMENT_TEAM = 8D98N325TG;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "";
@@ -1104,7 +1112,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		D38A242914E4C3FE00F6AFFE /* Build configuration list for PBXNativeTarget "ManOpen (Application)" */ = {
+		D38A242914E4C3FE00F6AFFE /* Build configuration list for PBXNativeTarget "ManOpen" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D38A242A14E4C3FE00F6AFFE /* Debug */,

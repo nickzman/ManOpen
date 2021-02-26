@@ -194,6 +194,8 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSSupportsAutomaticTermination</key>
+	<true/>
 	<key>NSSupportsSuddenTermination</key>
 	<true/>
 </dict>
