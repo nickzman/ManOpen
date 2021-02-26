@@ -9,7 +9,7 @@
 @property(nonatomic,retain) NSString *shortTitle;
 @property(nonatomic,retain) NSData *taskData;
 @property(nonatomic,assign) BOOL hasLoaded;
-@property(nonatomic,retain) NSURL *xManDocURL;
+@property(nonatomic,retain) NSURL *xManPageURL;
 @property(nonatomic,retain) NSMutableArray<NSString *> *sections;
 @property(nonatomic,retain) NSMutableArray<NSValue *> *sectionRanges;
 @property(nonatomic,retain) NSMutableDictionary<NSString *, NSString *> *restoreData;

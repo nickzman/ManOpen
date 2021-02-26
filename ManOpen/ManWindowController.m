@@ -84,21 +84,13 @@
 {
     ManDocument *document = self.document;
     
-    if (document.xManDocURL != nil)
+    if (document.xManPageURL != nil)
     {
         NSPasteboard *pb = [NSPasteboard generalPasteboard];
-        NSMutableArray<NSString *> *types = [NSMutableArray array];
         
-        [types addObject:NSURLPboardType];
-        if (document.xManDocURL.isFileURL)
-            [types addObject:NSFilenamesPboardType];
-        [types addObject:NSStringPboardType];
-        [pb declareTypes:types owner:nil];
-
-        [document.xManDocURL writeToPasteboard:pb];
-        [pb setString:[NSString stringWithFormat:@"<%@>", [document.xManDocURL absoluteString]] forType:NSStringPboardType];
-        if (document.xManDocURL.isFileURL)
-            [pb setPropertyList:[NSArray arrayWithObject:[document.xManDocURL path]] forType:NSFilenamesPboardType];
+        [pb clearContents];
+        [pb setData:[document.xManPageURL.absoluteString dataUsingEncoding:NSUTF8StringEncoding] forType:document.xManPageURL.fileURL ? (NSString *)kUTTypeFileURL : (NSString *)kUTTypeURL];
+        [pb setData:[[NSString stringWithFormat:@"<%@>", [document.xManPageURL absoluteString]] dataUsingEncoding:NSUTF8StringEncoding] forType:(NSString *)kUTTypeUTF8PlainText];
     }
 }
 
@@ -114,7 +106,7 @@
 - (BOOL)validateMenuItem:(NSMenuItem *)item
 {
     if ([item action] == @selector(copyURL:))
-        return ((ManDocument *)self.document).xManDocURL != nil;
+        return ((ManDocument *)self.document).xManPageURL != nil;
     return YES;
 }
 

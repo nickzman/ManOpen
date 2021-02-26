@@ -39,11 +39,11 @@
     if (section && [section length] > 0)
     {
         [command appendFormat:@" %@", [section lowercaseString]];
-        self.xManDocURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"x-man-doc://%@/%@", section, title]];
+        self.xManPageURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"x-man-page://%@/%@", section, title]];
     }
     else
     {
-        self.xManDocURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"x-man-doc://%@", title]];
+        self.xManPageURL = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"x-man-page://%@", title]];
     }
     
     self.restoreData = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
@@ -296,7 +296,7 @@
 
     // strip extension twice in case it is a e.g. "1.gz" filename
     [self setShortTitle:[[[[url path] lastPathComponent] stringByDeletingPathExtension] stringByDeletingPathExtension]];
-    self.xManDocURL = url;
+    self.xManPageURL = url;
     
     self.restoreData = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                    url,    RestoreFileURL,
@@ -361,7 +361,7 @@
     }
     /* Usually, URL-backed documents have been automatically restored already
        (the copyURL would be set), but just in case... */
-    else if ([restoreInfo objectForKey:RestoreFileURL] != nil && self.xManDocURL == nil)
+    else if ([restoreInfo objectForKey:RestoreFileURL] != nil && self.xManPageURL == nil)
     {
         NSURL *url = [restoreInfo objectForKey:RestoreFileURL];
         NSString *type  = [restoreInfo objectForKey:RestoreFileType];
