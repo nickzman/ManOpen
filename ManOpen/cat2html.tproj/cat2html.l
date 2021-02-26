@@ -19,7 +19,7 @@
     #define BOLDFLAG    1
     #define ULINEFLAG    2
 
-    int flags = 0, neededflags = 0;
+    long flags = 0, neededflags = 0;
     
     #define SETB    neededflags |= BOLDFLAG
     #define UNSETB  neededflags &= ~BOLDFLAG
