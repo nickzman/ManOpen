@@ -29,6 +29,7 @@
     self.textView.importsGraphics = NO;
     self.textView.richText = YES;
     self.textView.usesFindBar = YES;
+    self.textView.incrementalSearchingEnabled = YES;
 
     if (sizeString != nil)
     {

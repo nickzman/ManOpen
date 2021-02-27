@@ -25,13 +25,13 @@
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
                     <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="40">
-                        <rect key="frame" x="0.0" y="0.0" width="588" height="451"/>
+                        <rect key="frame" x="-1" y="-1" width="590" height="452"/>
                         <clipView key="contentView" id="LLT-hP-uba">
-                            <rect key="frame" x="1" y="1" width="571" height="449"/>
+                            <rect key="frame" x="1" y="1" width="573" height="450"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <customView id="41" customClass="ManTextView">
-                                    <rect key="frame" x="0.0" y="0.0" width="570" height="449"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="572" height="450"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <connections>
                                         <outlet property="delegate" destination="-2" id="43"/>
@@ -45,15 +45,15 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="67">
-                            <rect key="frame" x="572" y="1" width="15" height="449"/>
+                            <rect key="frame" x="574" y="1" width="15" height="450"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="40" secondAttribute="trailing" id="Fof-MJ-JlG"/>
-                    <constraint firstAttribute="bottom" secondItem="40" secondAttribute="bottom" id="cYb-YO-0Bc"/>
-                    <constraint firstItem="40" firstAttribute="leading" secondItem="9" secondAttribute="leading" id="gTc-Nu-5I4"/>
+                    <constraint firstAttribute="trailing" secondItem="40" secondAttribute="trailing" constant="-1" id="Fof-MJ-JlG"/>
+                    <constraint firstAttribute="bottom" secondItem="40" secondAttribute="bottom" constant="-1" id="cYb-YO-0Bc"/>
+                    <constraint firstItem="40" firstAttribute="leading" secondItem="9" secondAttribute="leading" constant="-1" id="gTc-Nu-5I4"/>
                     <constraint firstItem="40" firstAttribute="top" secondItem="9" secondAttribute="top" id="t9e-6t-tNd"/>
                 </constraints>
             </view>
