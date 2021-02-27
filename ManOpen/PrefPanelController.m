@@ -83,12 +83,22 @@
     if (bgColor == nil)
         bgColor = DATA_FOR_COLOR([NSColor textBackgroundColor]);
 
-    if ([manager fileExistsAtPath:@"/sw/share/man"]) // fink
-        manpath = [@"/sw/share/man:" stringByAppendingString:manpath];
-    if ([manager fileExistsAtPath:@"/opt/local/share/man"])  //macports
-        manpath = [@"/opt/local/share/man:" stringByAppendingString:manpath];
-    if ([manager fileExistsAtPath:@"/usr/X11R6/man"])
-        manpath = [manpath stringByAppendingString:@":/usr/X11R6/man"];
+    for (NSString *additionalManPath in @[
+                                        @"/usr/X11R6/man",  // X11
+                                        @"/sw/share/man",   // Fink < 0.45.2
+                                        @"/opt/sw/share/man",   // Fink >= 0.45.2
+                                        @"/opt/local/share/man",    // MacPorts
+                                        @"/opt/homebrew/share/man", // Homebrew on ARM64
+                                        @"/Applications/Xcode.app/Contents/Developer/usr/share/man",    // Xcode developer tools, current as of Xcode 12
+                                        @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/share/man",    // more Xcode developer tools
+                                        @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/share/man",    // Xcode API documentation
+                                        @"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/man", // Xcode compiler documentation
+                                        @"/Applications/CMake.app/Contents/man" // CMake
+                                        ])
+    {
+        if ([manager fileExistsAtPath:additionalManPath])
+            manpath = [manpath stringByAppendingFormat:@":%@", additionalManPath];
+    }
     
     defaults = [NSDictionary dictionaryWithObjectsAndKeys:
                 BOOL_NO,        @"QuitWhenLastClosed",
