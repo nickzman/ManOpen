@@ -12,7 +12,7 @@
                 <outlet property="fontField" destination="133" id="141"/>
                 <outlet property="generalSwitchMatrix" destination="291" id="374"/>
                 <outlet property="manPathController" destination="313" id="347"/>
-                <outlet property="manPathTableView" destination="278" id="308"/>
+                <outlet property="manPathTableView" destination="TAo-dF-gkX" id="xG1-8E-E92"/>
                 <outlet property="window" destination="225" id="324"/>
             </connections>
         </customObject>
@@ -311,58 +311,58 @@
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <scrollView horizontalLineScroll="18" horizontalPageScroll="10" verticalLineScroll="18" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="275">
+                                        <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cNl-RH-2w0">
                                             <rect key="frame" x="17" y="135" width="261" height="129"/>
-                                            <clipView key="contentView" id="8pM-7M-SUT">
-                                                <rect key="frame" x="1" y="1" width="244" height="127"/>
+                                            <clipView key="contentView" id="5m5-KJ-9yd">
+                                                <rect key="frame" x="1" y="1" width="259" height="127"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
-                                                    <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" autosaveColumns="NO" rowHeight="16" id="278" customClass="PoofDragTableView">
-                                                        <rect key="frame" x="0.0" y="0.0" width="244" height="127"/>
+                                                    <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" id="TAo-dF-gkX" customClass="PoofDragTableView">
+                                                        <rect key="frame" x="0.0" y="0.0" width="259" height="127"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                        <size key="intercellSpacing" width="3" height="2"/>
-                                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                        <size key="intercellSpacing" width="17" height="0.0"/>
+                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                         <tableColumns>
-                                                            <tableColumn editable="NO" width="203" minWidth="40" maxWidth="1000" id="280">
-                                                                <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
+                                                            <tableColumn editable="NO" width="247" minWidth="40" maxWidth="1000" id="AUJ-vq-moC">
+                                                                <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
                                                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
-                                                                    <color key="backgroundColor" white="0.33333299" alpha="1" colorSpace="calibratedWhite"/>
+                                                                    <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                                 </tableHeaderCell>
-                                                                <textFieldCell key="dataCell" lineBreakMode="clipping" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="283">
-                                                                    <font key="font" size="12" name="Helvetica"/>
+                                                                <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" title="Text Cell" id="6Id-Bu-zWH">
+                                                                    <font key="font" metaFont="system"/>
                                                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                     <connections>
-                                                                        <outlet property="formatter" destination="343" id="344"/>
+                                                                        <outlet property="formatter" destination="343" id="D8C-Qq-Srl"/>
                                                                     </connections>
                                                                 </textFieldCell>
-                                                                <tableColumnResizingMask key="resizingMask" resizeWithTable="YES"/>
+                                                                <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                                 <connections>
-                                                                    <binding destination="313" name="value" keyPath="arrangedObjects.description" id="345">
+                                                                    <binding destination="313" name="value" keyPath="arrangedObjects.description" id="PrM-uA-zvz">
                                                                         <dictionary key="options">
-                                                                            <integer key="NSConditionallySetsEditable" value="1"/>
-                                                                            <integer key="NSCreatesSortDescriptor" value="0"/>
+                                                                            <bool key="NSConditionallySetsEditable" value="YES"/>
+                                                                            <bool key="NSCreatesSortDescriptor" value="NO"/>
                                                                         </dictionary>
                                                                     </binding>
                                                                 </connections>
                                                             </tableColumn>
                                                         </tableColumns>
                                                         <connections>
-                                                            <binding destination="313" name="content" keyPath="arrangedObjects" id="320"/>
-                                                            <binding destination="313" name="selectionIndexes" keyPath="selectionIndexes" previousBinding="320" id="327"/>
-                                                            <outlet property="dataSource" destination="-2" id="325"/>
-                                                            <outlet property="delegate" destination="-2" id="309"/>
+                                                            <binding destination="313" name="content" keyPath="arrangedObjects" id="egf-Jb-Yke"/>
+                                                            <binding destination="313" name="selectionIndexes" keyPath="selectionIndexes" previousBinding="egf-Jb-Yke" id="jd6-Fv-2Gg"/>
+                                                            <outlet property="dataSource" destination="-2" id="JdV-ge-bsm"/>
+                                                            <outlet property="delegate" destination="-2" id="Z0H-uS-GfQ"/>
                                                         </connections>
                                                     </tableView>
                                                 </subviews>
                                             </clipView>
-                                            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="413">
-                                                <rect key="frame" x="-100" y="-100" width="221" height="15"/>
+                                            <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0ms-n5-7BT">
+                                                <rect key="frame" x="1" y="118" width="238" height="16"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </scroller>
-                                            <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="414">
-                                                <rect key="frame" x="245" y="1" width="15" height="127"/>
+                                            <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="aO1-EB-0bk">
+                                                <rect key="frame" x="224" y="17" width="15" height="102"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </scroller>
                                         </scrollView>
@@ -412,7 +412,7 @@
                                                 <constraint firstAttribute="height" constant="21" id="ZLN-0o-1yz"/>
                                             </constraints>
                                             <textFieldCell key="cell" selectable="YES" editable="YES" state="on" borderStyle="bezel" alignment="left" drawsBackground="YES" id="406">
-                                                <font key="font" size="12" name="Helvetica"/>
+                                                <font key="font" metaFont="system"/>
                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
@@ -423,21 +423,21 @@
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="234" firstAttribute="centerX" secondItem="35" secondAttribute="centerX" id="0wz-Js-NE4"/>
+                                        <constraint firstItem="cNl-RH-2w0" firstAttribute="leading" secondItem="233" secondAttribute="leading" constant="17" id="11d-Kq-dDW"/>
                                         <constraint firstItem="234" firstAttribute="top" secondItem="328" secondAttribute="bottom" constant="36" id="1xS-OX-JZF"/>
-                                        <constraint firstItem="275" firstAttribute="leading" secondItem="233" secondAttribute="leading" constant="17" id="4LB-tT-hae"/>
                                         <constraint firstItem="328" firstAttribute="leading" secondItem="35" secondAttribute="leading" id="8VE-ds-m12"/>
-                                        <constraint firstItem="275" firstAttribute="top" secondItem="284" secondAttribute="bottom" constant="8" symbolic="YES" id="Bz3-XR-wPB"/>
                                         <constraint firstItem="328" firstAttribute="bottom" secondItem="329" secondAttribute="bottom" id="Dg3-3u-Z0o"/>
+                                        <constraint firstItem="328" firstAttribute="top" secondItem="cNl-RH-2w0" secondAttribute="bottom" constant="8" symbolic="YES" id="FJK-0o-67T"/>
                                         <constraint firstItem="284" firstAttribute="leading" secondItem="233" secondAttribute="leading" constant="16" id="FSh-e0-rm9"/>
+                                        <constraint firstItem="cNl-RH-2w0" firstAttribute="top" secondItem="284" secondAttribute="bottom" constant="8" symbolic="YES" id="Hiy-Gc-t0c"/>
                                         <constraint firstItem="35" firstAttribute="top" secondItem="234" secondAttribute="bottom" constant="8" symbolic="YES" id="JAk-hW-mUQ"/>
                                         <constraint firstItem="234" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="284" secondAttribute="trailing" id="QPS-8a-yd0"/>
-                                        <constraint firstAttribute="trailing" secondItem="275" secondAttribute="trailing" constant="17" id="Sg9-7h-no3"/>
                                         <constraint firstItem="329" firstAttribute="leading" secondItem="328" secondAttribute="trailing" constant="-1" id="UdN-cR-n7V"/>
-                                        <constraint firstItem="275" firstAttribute="leading" secondItem="328" secondAttribute="leading" id="aoc-QI-bEx"/>
                                         <constraint firstItem="234" firstAttribute="leading" secondItem="284" secondAttribute="leading" id="eSc-FN-jUU"/>
-                                        <constraint firstItem="328" firstAttribute="top" secondItem="275" secondAttribute="bottom" constant="8" symbolic="YES" id="ejh-Kh-Fg3"/>
                                         <constraint firstAttribute="bottom" secondItem="35" secondAttribute="bottom" constant="26" id="icU-lu-KDa"/>
                                         <constraint firstItem="284" firstAttribute="top" secondItem="233" secondAttribute="top" constant="14" id="imY-69-pFV"/>
+                                        <constraint firstItem="328" firstAttribute="leading" secondItem="cNl-RH-2w0" secondAttribute="leading" id="k6d-n0-GbK"/>
+                                        <constraint firstAttribute="trailing" secondItem="cNl-RH-2w0" secondAttribute="trailing" constant="17" id="n5v-oX-cTw"/>
                                         <constraint firstAttribute="trailing" secondItem="284" secondAttribute="trailing" constant="16" id="x0a-KY-LJs"/>
                                         <constraint firstItem="328" firstAttribute="top" secondItem="329" secondAttribute="top" id="zOv-Oh-c1B"/>
                                     </constraints>
