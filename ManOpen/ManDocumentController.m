@@ -282,6 +282,8 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
             [document makeWindowControllers];
             [self addDocument:document];
         }
+		else
+			outError = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCannotOpenFile userInfo:@{NSURLErrorFailingURLErrorKey: standardizedURL, NSLocalizedDescriptionKey: [NSString stringWithFormat:NSLocalizedString(@"ManOpen cannot open files of type '%@'.", @"Error when the user tries to open a file with an unsupported type"), filename.pathExtension]}];
     }
 	else
 		alreadyOpen = YES;
@@ -708,26 +710,36 @@ static BOOL IsSectionWord(NSString *word)
 
 - (void)openSelection:(NSPasteboard *)pboard userData:(NSString *)data error:(NSString **)error
 {
-    NSString *pboardString;
-    NSArray *types = [pboard types];
-
-    if ([types containsObject:NSStringPboardType] &&
-        (pboardString = [pboard stringForType:NSStringPboardType]))
-    {
-        [self openString:pboardString];
-    }
+    for (NSPasteboardType type in pboard.types)
+	{
+		if ([type isEqualToString:(NSString *)kUTTypeUTF8PlainText] || [type isEqualToString:(NSString *)kUTTypePlainText] || [type isEqualToString:NSStringPboardType])
+		{
+			NSString *pboardString = [pboard stringForType:type];
+			
+			if (pboardString)
+			{
+				[self openString:pboardString];
+				return;
+			}
+		}
+	}
 }
 
 - (void)openApropos:(NSPasteboard *)pboard userData:(NSString *)data error:(NSString **)error
 {
-    NSString *pboardString;
-    NSArray *types = [pboard types];
-
-    if ([types containsObject:NSStringPboardType] &&
-        (pboardString = [pboard stringForType:NSStringPboardType]))
-    {
-        [self openApropos:pboardString];
-    }
+	for (NSPasteboardType type in pboard.types)
+	{
+		if ([type isEqualToString:(NSString *)kUTTypeUTF8PlainText] || [type isEqualToString:(NSString *)kUTTypePlainText] || [type isEqualToString:NSStringPboardType])
+		{
+			NSString *pboardString = [pboard stringForType:type];
+			
+			if (pboardString)
+			{
+				[self openApropos:pboardString];
+				return;
+			}
+		}
+	}
 }
 
 - (IBAction)orderFrontHelpPanel:(id)sender

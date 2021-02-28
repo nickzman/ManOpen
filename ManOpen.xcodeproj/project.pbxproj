@@ -59,6 +59,7 @@
 		E0494B3425E1DA3E00F0A452 /* Apropos.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2B25E1DA3E00F0A452 /* Apropos.xib */; };
 		E0494B3625E1DA3E00F0A452 /* DocController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0494B2F25E1DA3E00F0A452 /* DocController.xib */; };
 		E09F8EAD25EB537D00339867 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E09F8EAB25EB537D00339867 /* Localizable.strings */; };
+		E0CAF45625EC2FF0005B4C65 /* ServicesMenu.strings in Resources */ = {isa = PBXBuildFile; fileRef = E0CAF45825EC2FF0005B4C65 /* ServicesMenu.strings */; };
 		E0F6EC4C25E5C7EF0042529C /* ManWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = E0F6EC4A25E5C7EF0042529C /* ManWindowController.h */; };
 		E0F6EC4D25E5C7EF0042529C /* ManWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E0F6EC4B25E5C7EF0042529C /* ManWindowController.m */; };
 /* End PBXBuildFile section */
@@ -157,6 +158,7 @@
 		E09F8E9A25EB4AB800339867 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/ManPage.xib; sourceTree = "<group>"; };
 		E09F8E9B25EB4AC900339867 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/PrefPanel.xib; sourceTree = "<group>"; };
 		E09F8EAC25EB537D00339867 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		E0CAF45725EC2FF0005B4C65 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/ServicesMenu.strings; sourceTree = "<group>"; };
 		E0F6EC4A25E5C7EF0042529C /* ManWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManWindowController.h; sourceTree = "<group>"; };
 		E0F6EC4B25E5C7EF0042529C /* ManWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ManWindowController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -311,12 +313,13 @@
 		D392792E0821FFA400376676 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D39279350821FFA400376676 /* Credits.rtf */,
 				E0494B0725E1C2CF00F0A452 /* Images.xcassets */,
+				D39279380821FFA400376676 /* InfoPlist.strings */,
 				E09F8EAB25EB537D00339867 /* Localizable.strings */,
 				D392792F0821FFA400376676 /* ManOpen.scriptSuite */,
 				D39279330821FFA400376676 /* ManOpen.scriptTerminology */,
-				D39279350821FFA400376676 /* Credits.rtf */,
-				D39279380821FFA400376676 /* InfoPlist.strings */,
+				E0CAF45825EC2FF0005B4C65 /* ServicesMenu.strings */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -601,6 +604,7 @@
 				D38A241814E4C3FE00F6AFFE /* Credits.rtf in Resources */,
 				D38A241914E4C3FE00F6AFFE /* InfoPlist.strings in Resources */,
 				D3EA5B5A14E8DA3700AB000A /* helpQMark.tiff in Resources */,
+				E0CAF45625EC2FF0005B4C65 /* ServicesMenu.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -764,6 +768,14 @@
 				E09F8EAC25EB537D00339867 /* en */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		E0CAF45825EC2FF0005B4C65 /* ServicesMenu.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E0CAF45725EC2FF0005B4C65 /* en */,
+			);
+			name = ServicesMenu.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

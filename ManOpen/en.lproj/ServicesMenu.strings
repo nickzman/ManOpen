@@ -1,0 +1,11 @@
+/* 
+  ServicesMenu.strings
+  ManOpen
+
+  Created by Nick Zitzmann on 2/28/21.
+  
+*/
+
+"Open File in ManOpen" = "Open File in ManOpen";
+"Open man Page in ManOpen" = "Open man Page in ManOpen";
+"Search man Page Index in ManOpen" = "Search man Page Index in ManOpen";

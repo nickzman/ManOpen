@@ -138,12 +138,19 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>ManOpen/Open File</string>
+				<string>ManOpen/Open File in ManOpen</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>openFiles</string>
 			<key>NSPortName</key>
 			<string>ManOpen</string>
+			<key>NSRequiredContext</key>
+			<dict>
+				<key>NSTextContext</key>
+				<array>
+					<string>FilePath</string>
+				</array>
+			</dict>
 			<key>NSSendTypes</key>
 			<array>
 				<string>NSFilenamesPboardType</string>
@@ -160,7 +167,7 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>ManOpen/Open Selection</string>
+				<string>ManOpen/Open man Page in ManOpen</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>openSelection</string>
@@ -169,6 +176,7 @@
 			<key>NSSendTypes</key>
 			<array>
 				<string>NSStringPboardType</string>
+				<string>public.plain-text</string>
 			</array>
 		</dict>
 		<dict>
@@ -182,7 +190,7 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>ManOpen/Apropos</string>
+				<string>ManOpen/Search man Page Index in ManOpen</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>openApropos</string>
@@ -191,6 +199,7 @@
 			<key>NSSendTypes</key>
 			<array>
 				<string>NSStringPboardType</string>
+				<string>public.plain-text</string>
 			</array>
 		</dict>
 	</array>
