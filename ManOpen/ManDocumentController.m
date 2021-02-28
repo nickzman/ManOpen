@@ -436,9 +436,13 @@ static NSArray *GetWordArray(NSString *string)
     NSArray *words = GetWordArray(string);
     
     if ([words count] > 20) {
-        NSInteger reply = NSRunAlertPanel(@"Warning", @"This will open approximately %lu windows!",
-                                          @"Cancel", @"Continue", nil, [words count]);
-        if (reply != NSAlertAlternateReturn)
+        NSAlert *lotsOfWindowsAlert = [[NSAlert alloc] init];
+        
+        lotsOfWindowsAlert.messageText = NSLocalizedString(@"Warning", @"Alert title when the user tries to open many windows at once");
+        lotsOfWindowsAlert.informativeText = [NSString stringWithFormat:NSLocalizedString(@"This will open approximately %lu windows!", @"Alert message when the user tries to open many windows at once"), words.count];
+        [lotsOfWindowsAlert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Cancel")];
+        [lotsOfWindowsAlert addButtonWithTitle:NSLocalizedString(@"Continue", @"Continue")];
+        if ([lotsOfWindowsAlert runModal] == NSAlertFirstButtonReturn)
             return;
     }
 

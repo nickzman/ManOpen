@@ -771,7 +771,7 @@ static NSString *currentAppID = nil;
 
     if ([apps count] > 0)
         [[appPopup menu] addItem:[NSMenuItem separatorItem]];
-    [appPopup addItemWithTitle:@"Select... "];
+    [appPopup addItemWithTitle:NSLocalizedString(@"Select…", @"The item at the bottom of the default man page viewer pull-down, which selects an app to use as the default man page viewer")];
     [self setAppPopupToCurrent];
 }
 

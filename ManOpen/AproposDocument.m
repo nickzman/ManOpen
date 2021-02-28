@@ -56,7 +56,11 @@
 		[self _loadWithString:apropos manPath:manPath title:aTitle];
 		
 		if ([titles count] == 0) {
-			NSRunAlertPanel(@"Nothing found", @"No pages related to '%@' found", nil, nil, nil, apropos);
+            NSAlert *nothingFoundAlert = [[NSAlert alloc] init];
+            
+            nothingFoundAlert.messageText = NSLocalizedString(@"Nothing found", @"Title of an unsuccessful apropos search");
+            nothingFoundAlert.informativeText = [NSString stringWithFormat:NSLocalizedString(@"No pages related to '%@' found", @"Body of an unsuccessful apropos search"), apropos];
+            (void)[nothingFoundAlert runModal];
 			return nil;
 		}
 	}
