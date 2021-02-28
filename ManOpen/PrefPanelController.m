@@ -47,7 +47,7 @@
 
 - (NSString *)manPath
 {
-    return [self stringForKey:@"ManPath"];
+    return [[self objectForKey:@"ManPathArray"] componentsJoinedByString:@":"];
 }
 
 @end
@@ -71,10 +71,10 @@
     NSFileManager *manager = [NSFileManager defaultManager];
     NSDictionary *defaults;
     NSString *nroff   = @"nroff -mandoc '%@'";
-    NSString *manpath = @"/usr/local/man:/usr/share/man";
     NSData *textColor = [userDefaults dataForKey:@"TextColor"]; // historical name
     NSData *linkColor = [userDefaults dataForKey:@"LinkColor"]; // historical name
     NSData *bgColor = [userDefaults dataForKey:@"BackgroundColor"]; // historical name
+    NSMutableArray *manpath = [[[userDefaults stringForKey:@"ManPath"] componentsSeparatedByString:@":"] mutableCopy];  // historical name
     
     if (textColor == nil)
         textColor = DATA_FOR_COLOR([NSColor textColor]);
@@ -82,22 +82,27 @@
         linkColor = DATA_FOR_COLOR([NSColor colorWithDeviceRed:0.1f green:0.1f blue:1.0f alpha:1.0f]);
     if (bgColor == nil)
         bgColor = DATA_FOR_COLOR([NSColor textBackgroundColor]);
-
-    for (NSString *additionalManPath in @[
-                                        @"/usr/X11R6/man",  // X11
-                                        @"/sw/share/man",   // Fink < 0.45.2
-                                        @"/opt/sw/share/man",   // Fink >= 0.45.2
-                                        @"/opt/local/share/man",    // MacPorts
-                                        @"/opt/homebrew/share/man", // Homebrew on ARM64
-                                        @"/Applications/Xcode.app/Contents/Developer/usr/share/man",    // Xcode developer tools, current as of Xcode 12
-                                        @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/share/man",    // more Xcode developer tools
-                                        @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/share/man",    // Xcode API documentation
-                                        @"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/man", // Xcode compiler documentation
-                                        @"/Applications/CMake.app/Contents/man" // CMake
-                                        ])
+    if (!manpath)
     {
-        if ([manager fileExistsAtPath:additionalManPath])
-            manpath = [manpath stringByAppendingFormat:@":%@", additionalManPath];
+        manpath = [[NSMutableArray alloc] init];
+        [manpath addObject:@"/usr/share/man"];
+        [manpath addObject:@"/usr/local/man"];
+        for (NSString *additionalManPath in @[
+            @"/usr/X11R6/man",  // X11
+            @"/sw/share/man",   // Fink < 0.45.2
+            @"/opt/sw/share/man",   // Fink >= 0.45.2
+            @"/opt/local/share/man",    // MacPorts
+            @"/opt/homebrew/share/man", // Homebrew on ARM64
+            @"/Applications/Xcode.app/Contents/Developer/usr/share/man",    // Xcode developer tools, current as of Xcode 12
+            @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/share/man",    // more Xcode developer tools
+            @"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/share/man",    // Xcode API documentation
+            @"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/man", // Xcode compiler documentation
+            @"/Applications/CMake.app/Contents/man" // CMake
+                                            ])
+        {
+            if ([manager fileExistsAtPath:additionalManPath])
+                [manpath addObject:additionalManPath];
+        }
     }
     
     defaults = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -105,7 +110,7 @@
                 BOOL_NO,        @"UseItalics",
                 BOOL_YES,       @"UseBold",
                 nroff,          @"NroffCommand",
-                manpath,        @"ManPath",
+                manpath,        @"ManPathArray",
                 BOOL_NO,        @"KeepPanelsOpen",
                 textColor,      @"ManTextColor",
                 linkColor,      @"ManLinkColor",
@@ -321,7 +326,7 @@ static NSString *ManPathArrayKey = @"manPathArray";
 - (void)saveManPath
 {
     if (manPathArray != nil)
-        [[NSUserDefaults standardUserDefaults] setObject:[manPathArray componentsJoinedByString:@":"] forKey:@"ManPath"];
+        [[NSUserDefaults standardUserDefaults] setObject:manPathArray forKey:@"ManPathArray"];
 }
 
 - (void)addPathDirectories:(NSArray *)directories atIndex:(NSUInteger)insertIndex removeFirst:(NSIndexSet *)removeIndexes
@@ -372,8 +377,7 @@ static NSString *ManPathArrayKey = @"manPathArray";
 {
     if (manPathArray == nil)
     {
-        NSString *path = [[NSUserDefaults standardUserDefaults] manPath];
-        manPathArray = [[path componentsSeparatedByString:@":"] mutableCopy];
+        manPathArray = [[[NSUserDefaults standardUserDefaults] objectForKey:@"ManPathArray"] mutableCopy];
     }
     
     return manPathArray;
