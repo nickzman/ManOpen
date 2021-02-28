@@ -273,55 +273,6 @@
 
 @implementation ManTextView
 
-static NSCursor *linkCursor = nil;
-
-+ (void)initialize
-{
-    NSImage *linkImage;
-    NSString *path;
-
-    path = [[NSBundle mainBundle] pathForResource:@"LinkCursor" ofType:@"tiff"];
-    linkImage = [[NSImage alloc] initWithContentsOfFile: path];
-    linkCursor = [[NSCursor alloc] initWithImage:linkImage hotSpot:NSMakePoint(6.0f, 1.0f)];
-    [linkCursor setOnMouseEntered:YES];
-}
-
-- (void)resetCursorRects
-{
-    NSTextContainer *container = [self textContainer];
-    NSLayoutManager *layout    = [self layoutManager];
-    NSTextStorage *storage     = [self textStorage];
-    NSRect visible = [self visibleRect];
-    NSUInteger currIndex = 0;
-
-    [super resetCursorRects];
-
-    while (currIndex < [storage length])
-    {
-        NSRange currRange;
-        NSDictionary *attribs = [storage attributesAtIndex:currIndex effectiveRange:&currRange];
-        BOOL isLinkSection = [attribs objectForKey:NSLinkAttributeName] != nil;
-
-        if (isLinkSection)
-        {
-            NSRect *rects;
-            NSRange ignoreRange = {NSNotFound, 0};
-            NSUInteger i, rectCount = 0;
-
-            rects = [layout rectArrayForCharacterRange:currRange
-                            withinSelectedCharacterRange:ignoreRange
-                            inTextContainer:container
-                            rectCount:&rectCount];
-
-            for (i=0; i<rectCount; i++)
-                if (NSIntersectsRect(visible, rects[i]))
-                    [self addCursorRect:rects[i] cursor:linkCursor];
-        }
-
-        currIndex = NSMaxRange(currRange);
-    }
-}
-
 - (void)scrollRangeToTop:(NSRange)charRange
 {
     NSLayoutManager *layout = [self layoutManager];

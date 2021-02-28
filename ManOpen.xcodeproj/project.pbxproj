@@ -29,7 +29,6 @@
 		D38A240814E4C3FE00F6AFFE /* NSData+Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = D39279090821FFA400376676 /* NSData+Utils.h */; };
 		D38A240914E4C3FE00F6AFFE /* PrefPanelController.h in Headers */ = {isa = PBXBuildFile; fileRef = D392790B0821FFA400376676 /* PrefPanelController.h */; };
 		D38A240A14E4C3FE00F6AFFE /* SystemType.h in Headers */ = {isa = PBXBuildFile; fileRef = D392790D0821FFA400376676 /* SystemType.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		D38A241214E4C3FE00F6AFFE /* LinkCursor.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D39279280821FFA400376676 /* LinkCursor.tiff */; };
 		D38A241414E4C3FE00F6AFFE /* ManOpen.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D392792C0821FFA400376676 /* ManOpen.tiff */; };
 		D38A241514E4C3FE00F6AFFE /* ManOpen.scriptSuite in Resources */ = {isa = PBXBuildFile; fileRef = D392792F0821FFA400376676 /* ManOpen.scriptSuite */; };
 		D38A241714E4C3FE00F6AFFE /* ManOpen.scriptTerminology in Resources */ = {isa = PBXBuildFile; fileRef = D39279330821FFA400376676 /* ManOpen.scriptTerminology */; };
@@ -138,7 +137,6 @@
 		D392790B0821FFA400376676 /* PrefPanelController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefPanelController.h; sourceTree = "<group>"; };
 		D392790D0821FFA400376676 /* SystemType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SystemType.h; sourceTree = "<group>"; };
 		D39279100821FFA400376676 /* ManOpen_main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ManOpen_main.m; sourceTree = "<group>"; };
-		D39279280821FFA400376676 /* LinkCursor.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = LinkCursor.tiff; sourceTree = "<group>"; };
 		D392792C0821FFA400376676 /* ManOpen.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = ManOpen.tiff; sourceTree = "<group>"; };
 		D392792F0821FFA400376676 /* ManOpen.scriptSuite */ = {isa = PBXFileReference; lastKnownFileType = text.plist.scriptSuite; path = ManOpen.scriptSuite; sourceTree = "<group>"; };
 		D39279330821FFA400376676 /* ManOpen.scriptTerminology */ = {isa = PBXFileReference; lastKnownFileType = text.plist.scriptTerminology; path = ManOpen.scriptTerminology; sourceTree = "<group>"; };
@@ -305,7 +303,6 @@
 			isa = PBXGroup;
 			children = (
 				D3EA5B5914E8DA3700AB000A /* helpQMark.tiff */,
-				D39279280821FFA400376676 /* LinkCursor.tiff */,
 				D392792C0821FFA400376676 /* ManOpen.tiff */,
 			);
 			name = Images;
@@ -593,7 +590,6 @@
 			files = (
 				E0494B0825E1C2CF00F0A452 /* Images.xcassets in Resources */,
 				E0494B3125E1DA3E00F0A452 /* ManPage.xib in Resources */,
-				D38A241214E4C3FE00F6AFFE /* LinkCursor.tiff in Resources */,
 				E09F8EAD25EB537D00339867 /* Localizable.strings in Resources */,
 				E0494B3325E1DA3E00F0A452 /* PrefPanel.xib in Resources */,
 				D38A241414E4C3FE00F6AFFE /* ManOpen.tiff in Resources */,
