@@ -23,7 +23,7 @@
                                     <action selector="orderFrontStandardAboutPanel:" target="-2" id="318"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Preferences..." keyEquivalent="," id="299">
+                            <menuItem title="Preferences…" keyEquivalent="," id="299">
                                 <connections>
                                     <action selector="orderFrontPreferencesPanel:" target="54" id="316"/>
                                 </connections>
@@ -68,17 +68,17 @@
                 <menuItem title="File" id="45">
                     <menu key="submenu" title="File" id="49">
                         <items>
-                            <menuItem title="Open Title..." keyEquivalent="o" id="44">
+                            <menuItem title="Open Title…" keyEquivalent="o" id="44">
                                 <connections>
                                     <action selector="openTextPanel:" target="54" id="69"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Open File..." keyEquivalent="O" id="46">
+                            <menuItem title="Open File…" keyEquivalent="O" id="46">
                                 <connections>
                                     <action selector="openDocument:" target="-1" id="53"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Apropos..." keyEquivalent="A" id="241">
+                            <menuItem title="Search for man Page Using Apropos…" keyEquivalent="A" id="241">
                                 <connections>
                                     <action selector="openAproposPanel:" target="54" id="242"/>
                                 </connections>
@@ -163,12 +163,12 @@
                             <menuItem isSeparatorItem="YES" id="237">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Page Setup..." keyEquivalent="P" id="217">
+                            <menuItem title="Page Setup…" keyEquivalent="P" id="217">
                                 <connections>
                                     <action selector="runPageLayout:" target="54" id="345"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Print..." keyEquivalent="p" id="219">
+                            <menuItem title="Print…" keyEquivalent="p" id="219">
                                 <connections>
                                     <action selector="printDocument:" target="-1" id="220"/>
                                 </connections>
