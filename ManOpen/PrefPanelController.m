@@ -88,7 +88,7 @@
         [manpath addObject:@"/usr/share/man"];
         [manpath addObject:@"/usr/local/man"];
         for (NSString *additionalManPath in @[
-            @"/usr/X11R6/man",  // X11
+            @"/opt/X11/share/man",  // XQuartz
             @"/sw/share/man",   // Fink < 0.45.2
             @"/opt/sw/share/man",   // Fink >= 0.45.2
             @"/opt/local/share/man",    // MacPorts
