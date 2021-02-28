@@ -19,7 +19,7 @@
     #define BOLDFLAG    1
     #define ULINEFLAG    2
 
-    long flags = 0, neededflags = 0;
+    int flags = 0, neededflags = 0;
     
     #define SETB    neededflags |= BOLDFLAG
     #define UNSETB  neededflags &= ~BOLDFLAG
@@ -102,7 +102,7 @@
 
     static void emitString(char *string)
     {
-        int i, len=strlen(string);
+        size_t i, len=strlen(string);
         for (i=0;i<len;i++)
             emitChar(string[i]);
     }
