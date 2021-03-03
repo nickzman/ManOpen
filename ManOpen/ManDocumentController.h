@@ -1,5 +1,4 @@
 
-#import "ManOpenProtocol.h"
 #import "SystemType.h"
 #import <AppKit/NSDocumentController.h>
 
@@ -9,7 +8,7 @@
 
 extern NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes);
 
-@interface ManDocumentController : NSDocumentController <ManOpen>
+@interface ManDocumentController : NSDocumentController
 {
     IBOutlet NSPanel *openTextPanel;
     IBOutlet NSPanel *aproposPanel;

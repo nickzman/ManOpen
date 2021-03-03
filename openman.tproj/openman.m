@@ -3,7 +3,6 @@
 #import <AppKit/NSWorkspace.h>
 #import <libc.h>  // for getopt()
 #import <ctype.h> // for isdigit()
-#import "ManOpenProtocol.h"
 #import "SystemType.h"
 
 
@@ -41,11 +40,15 @@ int main (int argc, char * const *argv)
 		BOOL              aproposMode = NO;
 		BOOL              forceToFront = YES;
 		int               argIndex;
-		NSUInteger        fileIndex;
 		char              c;
-		NSDistantObject <ManOpen>  *server;
-		int               maxConnectTries;
-		int               connectCount;
+        int               maxConnectTries = 8;
+        int               connectCount = 0;
+        CFErrorRef        lsError = NULL;
+        NSArray           *manOpenURLs = CFBridgingRelease(LSCopyApplicationURLsForBundleIdentifier(CFSTR("org.clindberg.ManOpen"), &lsError));
+        NSMutableDictionary *distributedDictionary = [[NSMutableDictionary alloc] init];
+        NSMutableArray    *namesAndSections = [[NSMutableArray alloc] init];
+        CFMessagePortRef  remotePort;
+        SInt32            status;
 		
 		while ((c = getopt(argc,argv,"hbm:M:f:kaCcw")) != EOF)
 		{
@@ -123,59 +126,85 @@ int main (int argc, char * const *argv)
 			}
 		}
 		
-		/*
-		 * MacOS X Beta seems to take a little longer to start the app, so we try up
-		 * to three times with sleep()s in between to give it a chance. First check
-		 * to see if there's a version running though.  MacOS X 10.0 takes even longer,
-		 * so up it to 8 tries.
-		 */
-		maxConnectTries = 8;
-		connectCount = 0;
-		
-		do {
-			/* Try to connect to a running version... */
-			server = (NSDistantObject<ManOpen> *)[NSConnection rootProxyForConnectionWithRegisteredName:@"ManOpenApp" host:nil];
-			
-			if (server == nil) {
-				/*
-				 * Let Workspace try to start the app, and wait until it's up. If
-				 * launchApplication returns NO, then Workspace doesn't know about
-				 * the app, so there's no reason to keep waiting, and we bail out.
-				 */
-				if (connectCount == 0) {
-					if (![[NSWorkspace sharedWorkspace] launchApplication:@"ManOpen"])
-						maxConnectTries = 0;
-				}
-				
-				[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
-			}
-		} while (server == nil && connectCount++ < maxConnectTries);
-		
-		if (server == nil)
-		{
-			fprintf(stderr,"Could not open connection to ManOpen\n");
-			exit(1);
-		}
-		
-		[server setProtocolForProxy:@protocol(ManOpen)];
-		
-		for (fileIndex=0; fileIndex<[files count]; fileIndex++)
-		{
-			[server openFile:[files objectAtIndex:fileIndex] forceToFront:forceToFront];
-		}
-		
+        // Use Launch Services to find ManOpen.
+        if (!manOpenURLs)
+        {
+            fprintf(stderr, "Cannot locate ManOpen.\n");
+            exit(1);
+        }
+        else if (![manOpenURLs.firstObject isKindOfClass:[NSURL class]])
+        {
+            fprintf(stderr, "Received an unknown object type from Launch Services.\n");
+            exit(1);
+        }
+        
+        // Use NSWorkspace to launch ManOpen.
+        if (@available(macOS 10.15, *))
+        {
+            NSWorkspaceOpenConfiguration *configuration = [[NSWorkspaceOpenConfiguration alloc] init];
+            dispatch_semaphore_t launchLock = dispatch_semaphore_create(0);
+            
+            configuration.activates = forceToFront;
+            [[NSWorkspace sharedWorkspace] openApplicationAtURL:manOpenURLs.firstObject configuration:configuration completionHandler:^(NSRunningApplication * _Nullable app, NSError * _Nullable error) {
+                if (!app)
+                {
+                    fprintf(stderr, "Could not launch ManOpen\n");
+                    exit(1);
+                }
+                dispatch_semaphore_signal(launchLock);
+            }];
+            dispatch_semaphore_wait(launchLock, dispatch_time(DISPATCH_TIME_NOW, 10000000000)); // wait until the open event has gone through
+        }
+        else
+        {
+            NSError *launchErr = nil;
+            
+            if (![[NSWorkspace sharedWorkspace] launchApplicationAtURL:manOpenURLs.firstObject options:forceToFront ? 0UL : NSWorkspaceLaunchWithoutActivation configuration:@{} error:&launchErr])
+            {
+                fprintf(stderr, "Could not launch ManOpen\n");
+                exit(1);
+            }
+        }
+        
+        // Use a Mach port to open a connection; keep trying until one connects.
+        do
+        {
+            remotePort = CFMessagePortCreateRemote(NULL, CFSTR("8D98N325TG.org.clindberg.ManOpen.MachIPC"));
+            if (!remotePort)
+                sleep(1);
+        } while (remotePort == nil && connectCount++ < maxConnectTries);
+        
+        if (remotePort == nil)
+        {
+            fprintf(stderr,"Could not open connection to ManOpen\n");
+            exit(1);
+        }
+        
+        if (files.count)
+            distributedDictionary[@"Files"] = files;
+        
 		if (manPath == nil && getenv("MANPATH") != NULL)
 			manPath = MakeNSStringFromPath(getenv("MANPATH"));
 		
 		for (argIndex = optind; argIndex < argc; argIndex++)
 		{
 			NSString *currFile = MakeNSStringFromPath(argv[argIndex]);
-			if (aproposMode)
-				[server openApropos:currFile manPath:manPath forceToFront:forceToFront];
-			else
-				[server openName:currFile section:section manPath:manPath forceToFront:forceToFront];
+            NSDictionary *nameAndSection;
+            
+            if (section)
+                nameAndSection = @{@"Name": currFile, @"Section": section};
+            else
+                nameAndSection = @{@"Name": currFile};
+            [namesAndSections addObject:nameAndSection];
 		}
-		
+		if (aproposMode)
+            distributedDictionary[@"Apropos"] = @YES;
+        if (manPath)
+            distributedDictionary[@"ManPath"] = manPath;
+        distributedDictionary[@"NamesAndSections"] = namesAndSections;
+        
+        // Once we've got all our data together, send the message to the app. The message ID below is intentional, because I feel like I went mental writing this (it was my third attempt at replacing the original DO code).
+        status = CFMessagePortSendRequest(remotePort, 5150, (CFDataRef)[NSKeyedArchiver archivedDataWithRootObject:distributedDictionary], 10.0, 10.0, NULL, NULL);
 	}
     exit(0);       // insure the process exit status is 0
     return 0;      // ...and make main fit the ANSI spec.

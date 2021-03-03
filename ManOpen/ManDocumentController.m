@@ -48,8 +48,46 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
 }
 
 @interface ManDocumentController ()
-@property(nonatomic,retain) NSConnection *doConnection;
+@property(nonatomic,assign) CFMessagePortRef messagePort;
+
+// These are the old DO methods. DO is deprecated, and has been removed from the app, but we still use these methods internally.
+- (oneway void)openName:(NSString *)name section:(NSString *)section manPath:(NSString *)manPath forceToFront:(BOOL)force;
+- (oneway void)openApropos:(NSString *)apropos manPath:(NSString *)manPath forceToFront:(BOOL)force;
+- (oneway void)openFile:(NSString *)filename forceToFront:(BOOL)force;
 @end
+
+static CFDataRef MessagePortCallback(CFMessagePortRef port, SInt32 messageID, CFDataRef data, void *context)
+{
+    @try
+    {
+        ManDocumentController *self = (__bridge ManDocumentController *)context;
+        NSDictionary *commands = [NSKeyedUnarchiver unarchiveObjectWithData:(__bridge NSData *)data];
+        NSString *manPath = commands[@"ManPath"];
+        BOOL apropos = [commands[@"Apropos"] boolValue];
+        NSArray<NSString *> *files = commands[@"Files"];
+        NSArray<NSDictionary *> *namesAndSections = commands[@"NamesAndSections"];
+        
+        if (!manPath)
+            manPath = [[NSUserDefaults standardUserDefaults] manPath];
+        
+        for (NSString *file in files)
+        {
+            [self openFile:file forceToFront:NO];
+        }
+        for (NSDictionary *nameAndSection in namesAndSections)
+        {
+            if (apropos)
+                [self openApropos:nameAndSection[@"Name"] manPath:manPath forceToFront:NO];
+            else
+                [self openName:nameAndSection[@"Name"] section:nameAndSection[@"Section"] manPath:manPath forceToFront:NO];
+        }
+    }
+    @catch (NSException *exception)
+    {
+        NSLog(@"Exception processing a message: %@", exception);
+    }
+    return NULL;
+}
 
 @implementation ManDocumentController
 
@@ -58,12 +96,19 @@ NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes)
 	self = [super init];
 	if (self)
 	{
-		self.doConnection = [NSConnection serviceConnectionWithName:@"ManOpenApp" rootObject:self];
-		/*
-		 * Set ourselves up for DO connections.  I do it here so it's done as
-		 * early as possible.  If the command-line tool still has problems
-		 * connecting, we may be able to do this whole thing in main()...
-		 */
+        CFMessagePortContext context;
+        CFRunLoopSourceRef messagePortRLS;
+        
+        // Set ourselves up for connections from the command line tool. Originally, this app used DO, but DO is deprecated, and even if it wasn't, it doesn't work in the sandbox. But Mach ports work, so we use that instead.
+        // If anyone other than me is building this, then you will need to replace my developer group ID with your own below. And you'll probably need to make the same change in the app group in the entitlements as well.
+        bzero(&context, sizeof(CFMessagePortContext));
+        context.info = (__bridge void *)(self); // so we can send messages to ourself in the callback
+        self.messagePort = CFMessagePortCreateLocal(nil, CFSTR("8D98N325TG.org.clindberg.ManOpen.MachIPC"), MessagePortCallback, &context, false);
+        if (self.messagePort)   // don't crash if creating a message port didn't work
+        {
+            messagePortRLS = CFMessagePortCreateRunLoopSource(NULL, self.messagePort, 0);
+            CFRunLoopAddSource(CFRunLoopGetMain(), messagePortRLS, kCFRunLoopCommonModes);
+        }
 		
 		[PrefPanelController registerManDefaults];
 		[[NSBundle mainBundle] loadNibNamed:@"DocController" owner:self topLevelObjects:NULL];

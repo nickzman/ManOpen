@@ -25,7 +25,6 @@
 		D38A240314E4C3FE00F6AFFE /* AproposDocument.h in Headers */ = {isa = PBXBuildFile; fileRef = D39278FF0821FFA400376676 /* AproposDocument.h */; };
 		D38A240514E4C3FE00F6AFFE /* ManDocument.h in Headers */ = {isa = PBXBuildFile; fileRef = D39279030821FFA400376676 /* ManDocument.h */; };
 		D38A240614E4C3FE00F6AFFE /* ManDocumentController.h in Headers */ = {isa = PBXBuildFile; fileRef = D39279050821FFA400376676 /* ManDocumentController.h */; };
-		D38A240714E4C3FE00F6AFFE /* ManOpenProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = D39279070821FFA400376676 /* ManOpenProtocol.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		D38A240814E4C3FE00F6AFFE /* NSData+Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = D39279090821FFA400376676 /* NSData+Utils.h */; };
 		D38A240914E4C3FE00F6AFFE /* PrefPanelController.h in Headers */ = {isa = PBXBuildFile; fileRef = D392790B0821FFA400376676 /* PrefPanelController.h */; };
 		D38A240A14E4C3FE00F6AFFE /* SystemType.h in Headers */ = {isa = PBXBuildFile; fileRef = D392790D0821FFA400376676 /* SystemType.h */; settings = {ATTRIBUTES = (Project, ); }; };
@@ -133,7 +132,6 @@
 		D39278FF0821FFA400376676 /* AproposDocument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AproposDocument.h; sourceTree = "<group>"; };
 		D39279030821FFA400376676 /* ManDocument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManDocument.h; sourceTree = "<group>"; };
 		D39279050821FFA400376676 /* ManDocumentController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManDocumentController.h; sourceTree = "<group>"; };
-		D39279070821FFA400376676 /* ManOpenProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManOpenProtocol.h; sourceTree = "<group>"; };
 		D39279090821FFA400376676 /* NSData+Utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+Utils.h"; sourceTree = "<group>"; };
 		D392790B0821FFA400376676 /* PrefPanelController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefPanelController.h; sourceTree = "<group>"; };
 		D392790D0821FFA400376676 /* SystemType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SystemType.h; sourceTree = "<group>"; };
@@ -272,7 +270,6 @@
 				D39278FF0821FFA400376676 /* AproposDocument.h */,
 				D39279030821FFA400376676 /* ManDocument.h */,
 				D39279050821FFA400376676 /* ManDocumentController.h */,
-				D39279070821FFA400376676 /* ManOpenProtocol.h */,
 				E0F6EC4A25E5C7EF0042529C /* ManWindowController.h */,
 				D39279090821FFA400376676 /* NSData+Utils.h */,
 				D392790B0821FFA400376676 /* PrefPanelController.h */,
@@ -438,7 +435,6 @@
 				D38A240514E4C3FE00F6AFFE /* ManDocument.h in Headers */,
 				D38A240614E4C3FE00F6AFFE /* ManDocumentController.h in Headers */,
 				E0F6EC4C25E5C7EF0042529C /* ManWindowController.h in Headers */,
-				D38A240714E4C3FE00F6AFFE /* ManOpenProtocol.h in Headers */,
 				D38A240814E4C3FE00F6AFFE /* NSData+Utils.h in Headers */,
 				D38A240914E4C3FE00F6AFFE /* PrefPanelController.h in Headers */,
 				D38A240A14E4C3FE00F6AFFE /* SystemType.h in Headers */,
