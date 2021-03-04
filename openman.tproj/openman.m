@@ -3,7 +3,6 @@
 #import <AppKit/NSWorkspace.h>
 #import <libc.h>  // for getopt()
 #import <ctype.h> // for isdigit()
-#import "SystemType.h"
 
 
 static NSString *MakeNSStringFromPath(const char *filename)

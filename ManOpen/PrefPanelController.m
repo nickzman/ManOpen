@@ -148,17 +148,6 @@
 {
     [super windowDidLoad];
 
-    /* The "save windows on quit" is a Lion-only feature */
-    if (!IsLion()) {
-        NSRect oldFrame = [generalSwitchMatrix frame];
-        [generalSwitchMatrix removeRow:4];
-        [generalSwitchMatrix sizeToCells];        
-        NSRect newFrame = [generalSwitchMatrix frame];
-        /* Keep the top edge at the same place; sizeToCells just lowers the height */
-        newFrame.origin.y += (oldFrame.size.height - newFrame.size.height);
-        [generalSwitchMatrix setFrame:newFrame];
-        
-    }
     [self setUpDefaultManViewerApp];
     [self setUpManPathUI];
     [self setFontFieldToFont:[[NSUserDefaults standardUserDefaults] manFont]];

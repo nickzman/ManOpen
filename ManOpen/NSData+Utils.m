@@ -1,6 +1,5 @@
 
 #import "NSData+Utils.h"
-#import "SystemType.h"
 #import <Foundation/NSException.h>
 #import <libc.h>
 #import <ctype.h>

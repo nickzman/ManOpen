@@ -1,5 +1,4 @@
 
-#import "SystemType.h"
 #import <Cocoa/Cocoa.h>
 
 @interface ManDocument : NSDocument

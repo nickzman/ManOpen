@@ -1,6 +1,5 @@
 /* PrefPanelController.h created by lindberg on Fri 08-Oct-1999 */
 
-#import "SystemType.h"
 #import <AppKit/NSWindowController.h>
 
 @class NSMutableArray;

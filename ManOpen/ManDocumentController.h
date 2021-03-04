@@ -1,5 +1,4 @@
 
-#import "SystemType.h"
 #import <AppKit/NSDocumentController.h>
 
 
