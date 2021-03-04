@@ -11,7 +11,6 @@ extern NSString *EscapePath(NSString *path, BOOL addSurroundingQuotes);
 {
     IBOutlet NSPanel *openTextPanel;
     IBOutlet NSPanel *aproposPanel;
-    IBOutlet NSPanel *infoPanel;
     IBOutlet NSPanel *helpPanel;
     IBOutlet NSTextField *aproposField;
     IBOutlet NSTextField *openTextField;
