@@ -116,6 +116,7 @@
 		NSColor       *textColor = [defaults manTextColor];
 		NSColor       *backgroundColor = [defaults manBackgroundColor];
         ManWindowController *manWC = self.windowControllers.firstObject;
+        NSMutableDictionary *linkTextAttribtues = manWC.textView.linkTextAttributes.mutableCopy;
 		
 		if (manWC.textView == nil || self.hasLoaded) return;
 		
@@ -160,14 +161,11 @@
 					NSRange currRange;
 					NSDictionary *attribs = [storage attributesAtIndex:currIndex effectiveRange:&currRange];
 					NSFont       *font = [attribs objectForKey:NSFontAttributeName];
-					BOOL isLink = NO;
 					
 					/* We mark "sections" with Helvetica fonts */
 					if (font != nil && ![[font familyName] isEqualToString:@"Courier"]) {
 						[self addSectionHeader:[[storage string] substringWithRange:currRange] range:currRange];
 					}
-					
-					isLink = ([attribs objectForKey:NSLinkAttributeName] != nil);
 					
 					if (font != nil && ![[font familyName] isEqualToString:family])
 						font = [manager convertFont:font toFamily:family];
@@ -176,15 +174,7 @@
 					if (font != nil)
 						[storage addAttribute:NSFontAttributeName value:font range:currRange];
 					
-					/*
-					 * Starting in 10.3, there is a -setLinkTextAttributes: method to set these, without having to
-					 * determine the ranges ourselves.  However, since we are already iterating all the ranges
-					 * for other reasons, may as well keep the old way.
-					 */
-					if (isLink)
-						[storage addAttribute:NSForegroundColorAttributeName value:linkColor range:currRange];
-					else
-						[storage addAttribute:NSForegroundColorAttributeName value:textColor range:currRange];
+					[storage addAttribute:NSForegroundColorAttributeName value:textColor range:currRange];
 					
 					currIndex = NSMaxRange(currRange);
 				}
@@ -200,6 +190,8 @@
 			[manWC.textView.window invalidateCursorRectsForView:manWC.textView];
 		}
 		
+        [linkTextAttribtues setValue:linkColor forKey:NSForegroundColorAttributeName];
+        manWC.textView.linkTextAttributes = linkTextAttribtues;
 		[manWC.textView setBackgroundColor:backgroundColor];
         [manWC.textView.window.toolbar validateVisibleItems];
 		
