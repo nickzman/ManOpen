@@ -4,14 +4,34 @@
 #import <AppKit/AppKit.h>
 #import "ManDocumentController.h"
 
+FOUNDATION_STATIC_INLINE NSColor *COLOR_FOR_DATA(NSData *colorData)
+{
+    NSColor *returnValue = nil;
+    
+    if (colorData == nil) return nil;
+    if (@available(macOS 10.13, *))
+    {
+        returnValue = [NSKeyedUnarchiver unarchivedObjectOfClass:[NSColor class] fromData:colorData error:NULL];
+    }
+    else
+    {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        returnValue = [NSKeyedUnarchiver unarchiveObjectWithData:colorData];
+    }
+    if (!returnValue)   // backward compatibility with ManOpen 2.x, which used the deprecated NSArchiver
+        returnValue = [NSUnarchiver unarchiveObjectWithData:colorData];
+#pragma  clang diagnostic pop
+    return returnValue;
+}
+
 @implementation NSUserDefaults (ManOpenPreferences)
 
 - (NSColor *)_manColorForKey:(NSString *)key
 {
     NSData *colorData = [self dataForKey:key];
     
-    if (colorData == nil) return nil;
-    return [NSUnarchiver unarchiveObjectWithData:colorData];
+    return COLOR_FOR_DATA(colorData);
 }
 - (NSColor *)manTextColor
 {
@@ -59,9 +79,20 @@
 - (void)setUpManPathUI;
 @end
 
-#define DATA_FOR_COLOR(color) [NSArchiver archivedDataWithRootObject:color]
-#define BOOL_YES [NSNumber numberWithBool:YES]
-#define BOOL_NO [NSNumber numberWithBool:NO]
+FOUNDATION_STATIC_INLINE NSData *DATA_FOR_COLOR(NSColor *color)
+{
+    if (@available(macOS 10.13, *))
+    {
+        return [NSKeyedArchiver archivedDataWithRootObject:color requiringSecureCoding:YES error:NULL];
+    }
+    else
+    {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        return [NSKeyedArchiver archivedDataWithRootObject:color];
+#pragma clang diagnostic pop
+    }
+}
 
 @implementation PrefPanelController
 
@@ -106,16 +137,16 @@
     }
     
     defaults = [NSDictionary dictionaryWithObjectsAndKeys:
-                BOOL_NO,        @"QuitWhenLastClosed",
-                BOOL_NO,        @"UseItalics",
-                BOOL_YES,       @"UseBold",
+                @NO,            @"QuitWhenLastClosed",
+                @NO,            @"UseItalics",
+                @YES,           @"UseBold",
                 nroff,          @"NroffCommand",
                 manpath,        @"ManPathArray",
-                BOOL_NO,        @"KeepPanelsOpen",
+                @NO,            @"KeepPanelsOpen",
                 textColor,      @"ManTextColor",
                 linkColor,      @"ManLinkColor",
                 bgColor,        @"ManBackgroundColor",
-                BOOL_YES,       @"NSQuitAlwaysKeepsWindows", // NO will disable by default
+                @YES,           @"NSQuitAlwaysKeepsWindows", // NO will disable by default
                 nil];
     
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
@@ -137,9 +168,10 @@
 - (id)init
 {
     self = [super initWithWindowNibName:@"PrefPanel"];
-    [self setShouldCascadeWindows:NO];
-    [[NSFontManager sharedFontManager] setDelegate:self];
-
+    if (self)
+    {
+        [self setShouldCascadeWindows:NO];
+    }
     return self;
 }
 
@@ -168,13 +200,7 @@
     [[NSFontPanel sharedFontPanel] orderFront:self];   // Leave us as key
 }
 
-/* We only want to allow fixed-pitch fonts.  Does not seem to be called on OSX, though it was documented to work pre-10.3. Rats. */
-- (BOOL)fontManager:(id)sender willIncludeFont:(NSString *)fontName
-{
-    return [sender fontNamed:fontName hasTraits:NSFixedPitchFontMask];
-}
-
-- (void)changeFont:(id)sender
+- (void)changeFont:(nullable NSFontManager *)sender
 {
     NSFont *font = [fontField font];
     NSString *fontString;
@@ -297,6 +323,34 @@
 }
 @end
 
+// This transformer is used to load and store the color wells.
+@implementation ManOpenColorDataTransformer
+
++ (Class)transformedValueClass
+{
+    return NSColor.class;
+}
+
+
++ (BOOL)allowsReverseTransformation
+{
+    return YES;
+}
+
+
+- (id)transformedValue:(id)value
+{
+    return COLOR_FOR_DATA(value);
+}
+
+
+- (id)reverseTransformedValue:(id)value
+{
+    return DATA_FOR_COLOR(value);
+}
+
+@end
+
 static NSString *ManPathIndexSetPboardType = @"org.clindberg.ManOpen.ManPathIndexSetType";
 static NSString *ManPathArrayKey = @"manPathArray";
 
@@ -305,7 +359,7 @@ static NSString *ManPathArrayKey = @"manPathArray";
 
 - (void)setUpManPathUI
 {
-    [manPathTableView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, NSStringPboardType, ManPathIndexSetPboardType, nil]];
+    [manPathTableView registerForDraggedTypes:@[(NSString *)kUTTypeFileURL, (NSString *)kUTTypeUTF8PlainText, ManPathIndexSetPboardType]];
     [manPathTableView setVerticalMotionCanBeginDrag:YES];
     // XXX NSDragOperationDelete -- not sure the "poof" drag can show that
     [manPathTableView setDraggingSourceOperationMask:NSDragOperationCopy                     forLocal:NO];
@@ -388,7 +442,7 @@ static NSString *ManPathArrayKey = @"manPathArray";
     [panel setCanChooseFiles:NO];
 
 	[panel beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse result) {
-		if (result == NSFileHandlingPanelOKButton)
+        if (result == NSModalResponseOK)
 		{
 			PrefPanelController *strongSelf = weakSelf;
 			NSArray *urls = [panel URLs];
@@ -427,11 +481,11 @@ static NSString *ManPathArrayKey = @"manPathArray";
 
 - (BOOL)writePaths:(NSArray *)paths toPasteboard:(NSPasteboard *)pb
 {
-    [pb declareTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] owner:nil];
+    [pb declareTypes:@[(NSString *)kUTTypeUTF8PlainText] owner:nil];
 
     /* This causes an NSLog if one of the paths does not exist. Hm.  May not be worth it. Might let folks drag to Trash etc. as well. */
 //        [pb setPropertyList:paths forType:NSFilenamesPboardType];
-    return [pb setString:[paths componentsJoinedByString:@":"] forType:NSStringPboardType];
+    return [pb setString:[paths componentsJoinedByString:@":"] forType:(NSString *)kUTTypeUTF8PlainText];
 }
 
 - (BOOL)writeIndexSet:(NSIndexSet *)set toPasteboard:(NSPasteboard *)pb
@@ -440,22 +494,39 @@ static NSString *ManPathArrayKey = @"manPathArray";
 
     if ([self writePaths:files toPasteboard:pb])
     {
-        [pb addTypes:[NSArray arrayWithObject:ManPathIndexSetPboardType] owner:nil];
-        return [pb setData:[NSArchiver archivedDataWithRootObject:set] forType:ManPathIndexSetPboardType];
+        [pb addTypes:@[ManPathIndexSetPboardType] owner:nil];
+        if (@available(macOS 10.13, *))
+        {
+            return [pb setData:[NSKeyedArchiver archivedDataWithRootObject:set requiringSecureCoding:YES error:NULL] forType:ManPathIndexSetPboardType];
+        }
+        else
+        {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            return [pb setData:[NSKeyedArchiver archivedDataWithRootObject:set] forType:ManPathIndexSetPboardType];
+#pragma clang diagnostic pop
+        }
     }
 
     return NO;
 }
 
-- (NSArray *)pathsFromPasteboard:(NSPasteboard *)pb
+- (NSArray<NSString *> *)pathsFromPasteboard:(NSPasteboard *)pb
 {
-    NSString *bestType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSStringPboardType, nil]];
+    NSString *bestType = [pb availableTypeFromArray:@[(NSString *)kUTTypeFileURL, (NSString *)kUTTypeUTF8PlainText]];
     
-    if ([bestType isEqual:NSFilenamesPboardType])
-        return [pb propertyListForType:NSFilenamesPboardType];
+    if ([bestType isEqual:(NSString *)kUTTypeFileURL])
+    {
+        NSArray<NSURL *> *fileURLs = [pb readObjectsForClasses:@[[NSURL class]] options:@{NSPasteboardURLReadingFileURLsOnlyKey: @YES}];
+        NSMutableArray<NSString *> *filePaths = [NSMutableArray arrayWithCapacity:fileURLs.count];
+        
+        for (NSURL *fileURL in fileURLs)
+            [filePaths addObject:fileURL.path];
+        return filePaths;
+    }
     
-    if ([bestType isEqual:NSStringPboardType])
-        return [[pb stringForType:NSStringPboardType] componentsSeparatedByString:@":"];
+    if ([bestType isEqual:(NSString *)kUTTypeUTF8PlainText])
+        return [[pb stringForType:(NSString *)kUTTypeUTF8PlainText] componentsSeparatedByString:@":"];
     
     return nil;
 }
@@ -522,7 +593,17 @@ static NSString *ManPathArrayKey = @"manPathArray";
     {
         NSData *indexData = [pb dataForType:ManPathIndexSetPboardType];
         if ((dragOp & NSDragOperationMove) && indexData != nil) {
-            removeSet = [NSUnarchiver unarchiveObjectWithData:indexData];
+            if (@available(macOS 10.13, *))
+            {
+                removeSet = [NSKeyedUnarchiver unarchivedObjectOfClass:[NSIndexSet class] fromData:indexData error:NULL];
+            }
+            else
+            {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                removeSet = [NSKeyedUnarchiver unarchiveObjectWithData:indexData];
+#pragma clang diagnostic pop
+            }
             pathsToAdd = [self pathsAtIndexes:removeSet];
         }
     }
@@ -543,13 +624,39 @@ static NSString *ManPathArrayKey = @"manPathArray";
 /* PoofDragTableView datasource method */
 - (BOOL)tableView:(NSTableView *)tableView performDropOutsideViewAtPoint:(NSPoint)screenPoint
 {
-    NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSDragPboard];
+    NSPasteboard *pb;
+    
+    if (@available(macOS 10.13, *))
+    {
+        pb = [NSPasteboard pasteboardWithName:NSPasteboardNameDrag];
+    }
+    else
+    {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        pb = [NSPasteboard pasteboardWithName:NSDragPboard];
+#pragma clang diagnostic pop
+    }
+    
     if ([[pb types] containsObject:ManPathIndexSetPboardType])
     {
         NSData *indexData = [pb dataForType:ManPathIndexSetPboardType];
         if (indexData != nil)
         {
-            NSIndexSet *removeSet = [NSUnarchiver unarchiveObjectWithData:indexData];
+            NSIndexSet *removeSet;
+            
+            if (@available(macOS 10.13, *))
+            {
+                removeSet = [NSKeyedUnarchiver unarchivedObjectOfClass:[NSIndexSet class] fromData:indexData error:NULL];
+            }
+            else
+            {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                removeSet = [NSKeyedUnarchiver unarchiveObjectWithData:indexData];
+#pragma clang diagnostic pop
+            }
+            
             if ([removeSet count] > 0) {
                 [self addPathDirectories:[NSArray array] atIndex:0 removeFirst:removeSet];
                 return YES;
@@ -578,7 +685,7 @@ static NSString *ManPathArrayKey = @"manPathArray";
 @interface MVAppInfo : NSObject
 
 + (NSArray *)allManViewerApps;
-+ (void)addAppWithID:(NSString *)aBundleID sort:(BOOL)shouldResort;
++ (void)addAppWithURL:(NSURL *)aURL sort:(BOOL)shouldResort;
 + (NSUInteger)indexOfBundleID:(NSString*)bundleID;
 @property(nonatomic,retain) NSString *bundleID;
 @property(nonatomic,retain) NSString *displayName;
@@ -593,12 +700,13 @@ static NSString *ManPathArrayKey = @"manPathArray";
 
 static NSMutableArray *allApps = nil;
 
-- (instancetype)initWithBundleID:(NSString *)aBundleID
+- (instancetype)initWithAppURL:(NSURL *)appURL
 {
 	self = [self init];
 	if (self)
 	{
-		_bundleID = aBundleID;
+        self.appURL = appURL;
+        self.bundleID = [NSBundle bundleWithURL:self.appURL].bundleIdentifier;
 	}
     return self;
 }
@@ -621,19 +729,6 @@ static NSMutableArray *allApps = nil;
     return [[self displayName] localizedCaseInsensitiveCompare:[other displayName]];
 }
 
-
-- (NSURL *)appURL
-{
-    if (_appURL == nil)
-    {
-        NSString *path = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:self.bundleID];
-        if (path != nil)
-            _appURL = [NSURL fileURLWithPath:path];
-    }
-
-    return _appURL;
-}
-
 - (NSString *)displayName
 {
     if (_displayName == nil)
@@ -642,15 +737,12 @@ static NSMutableArray *allApps = nil;
 		NSDictionary *infoDict = (id)CFBridgingRelease(CFBundleCopyInfoDictionaryForURL((CFURLRef)url));
         NSString *appVersion;
         NSString *niceName = nil;
-		CFStringRef niceNameCF = NULL;
+        
+        if (![url getResourceValue:&niceName forKey:NSURLLocalizedNameKey error:NULL])
+            niceName = url.path.lastPathComponent;
 
         if (infoDict == nil)
-            infoDict = [[NSBundle bundleWithPath:[url path]] infoDictionary];
-        
-		LSCopyDisplayNameForURL((__bridge CFURLRef)url, &niceNameCF);
-		niceName = CFBridgingRelease(niceNameCF);
-        if (niceName == nil)
-            niceName = [[url path] lastPathComponent];
+            infoDict = [NSBundle bundleWithURL:url].infoDictionary;
         
         appVersion = [infoDict objectForKey:@"CFBundleShortVersionString"];
         if (appVersion != nil)
@@ -666,9 +758,10 @@ static NSMutableArray *allApps = nil;
 {
     [allApps sortUsingSelector:@selector(compareDisplayName:)];
 }
-+ (void)addAppWithID:(NSString *)aBundleID sort:(BOOL)shouldResort
+
++ (void)addAppWithURL:(NSURL *)aURL sort:(BOOL)shouldResort
 {
-    MVAppInfo *info = [[MVAppInfo alloc] initWithBundleID:aBundleID];
+    MVAppInfo *info = [[MVAppInfo alloc] initWithAppURL:aURL];
     if (![allApps containsObject:info])
     {
         [allApps addObject:info];
@@ -686,13 +779,18 @@ static NSMutableArray *allApps = nil;
 //        NSURL *url = [NSURL fileURLWithPath:appPath];
 //        LSRegisterURL((CFURLRef)url, false);
         
-		NSArray *allBundleIDs = (id)CFBridgingRelease(LSCopyAllHandlersForURLScheme((CFStringRef)URL_SCHEME));
-        NSUInteger i;
+        NSURLComponents *ourURLComponents = [[NSURLComponents alloc] init];
+        
+        ourURLComponents.scheme = URL_SCHEME;
+        ourURLComponents.host = @"man";
+        
+        NSArray<NSURL *> *allBundleURLs = CFBridgingRelease(LSCopyApplicationURLsForURL((__bridge CFURLRef _Nonnull)(ourURLComponents.URL), kLSRolesViewer));
 
-        allApps = [[NSMutableArray alloc] initWithCapacity:[allBundleIDs count]];
-        for (i = 0; i<[allBundleIDs count]; i++) {
-            [self addAppWithID:[allBundleIDs objectAtIndex:i] sort:NO];
-        }        
+        allApps = [[NSMutableArray alloc] initWithCapacity:allBundleURLs.count];
+        for (NSURL *bundleURL in allBundleURLs)
+        {
+            [self addAppWithURL:bundleURL sort:NO];
+        }
         [self sortApps];
     }
     
@@ -766,7 +864,13 @@ static NSString *currentAppID = nil;
 
 - (void)resetCurrentApp
 {
-	NSString *currSetID = (id)CFBridgingRelease(LSCopyDefaultHandlerForURLScheme((CFStringRef)URL_SCHEME));
+    NSURLComponents *ourURLComponents = [[NSURLComponents alloc] init];
+    
+    ourURLComponents.scheme = URL_SCHEME;
+    ourURLComponents.host = @"man";
+    
+    NSURL *currSetURL = (NSURL *)CFBridgingRelease(LSCopyDefaultApplicationURLForURL((__bridge CFURLRef _Nonnull)(ourURLComponents.URL), kLSRolesViewer, NULL));
+    NSString *currSetID = currSetURL ? [NSBundle bundleWithURL:currSetURL].bundleIdentifier : nil;
     
     if (currSetID == nil)
         currSetID = [[[MVAppInfo allManViewerApps] objectAtIndex:0] bundleID];
@@ -779,7 +883,7 @@ static NSString *currentAppID = nil;
 
         if ([MVAppInfo indexOfBundleID:currSetID] == NSNotFound)
         {
-            [MVAppInfo addAppWithID:currSetID sort:YES];
+            [MVAppInfo addAppWithURL:currSetURL sort:YES];
             resetPopup = YES;
         }
         if (resetPopup)
@@ -822,7 +926,7 @@ static NSString *currentAppID = nil;
         [panel setResolvesAliases:YES];
         [panel setCanChooseFiles:YES];
 		[panel beginSheetModalForWindow:appPopup.window completionHandler:^(NSModalResponse result) {
-			if (result == NSFileHandlingPanelOKButton)
+            if (result == NSModalResponseOK)
 			{
 				NSURL *appURL = [panel URL];
 				NSString *appID = [[NSBundle bundleWithPath:[appURL path]] bundleIdentifier];

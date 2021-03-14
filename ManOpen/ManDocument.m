@@ -320,7 +320,7 @@
 
     [printInfo setVerticallyCentered:NO];
     [printInfo setHorizontallyCentered:YES];
-    [printInfo setHorizontalPagination:NSFitPagination];
+    [printInfo setHorizontalPagination:NSPrintingPaginationModeFit];
     [operation setShowsPrintPanel:showPrintPanel];
     [operation setShowsProgressPanel:showPrintPanel];
 

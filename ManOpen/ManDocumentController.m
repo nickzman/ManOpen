@@ -61,7 +61,21 @@ static CFDataRef MessagePortCallback(CFMessagePortRef port, SInt32 messageID, CF
     @try
     {
         ManDocumentController *self = (__bridge ManDocumentController *)context;
-        NSDictionary *commands = [NSKeyedUnarchiver unarchiveObjectWithData:(__bridge NSData *)data];
+        NSError *err = nil;
+        NSDictionary *commands;
+        
+        if (@available(macOS 10.13, *))
+        {
+            commands = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[[NSDictionary class], [NSMutableArray class], [NSArray class], [NSNumber class], [NSString class]]] fromData:(__bridge NSData *)data error:&err];
+        }
+        else
+        {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            commands = [NSKeyedUnarchiver unarchiveObjectWithData:(__bridge  NSData *)data];
+#pragma clang diagnostic pop
+        }
+        
         NSString *manPath = commands[@"ManPath"];
         BOOL apropos = [commands[@"Apropos"] boolValue];
         NSArray<NSString *> *files = commands[@"Files"];
@@ -615,7 +629,7 @@ static BOOL IsSectionWord(NSString *word)
     [openTextField selectText:self];
 
     if ([self useModalPanels]) {
-        if ([NSApp runModalForWindow:openTextPanel] == NSOKButton)
+        if ([NSApp runModalForWindow:openTextPanel] == NSModalResponseOK)
             [self openTitleFromPanel];
     }
     else {
@@ -627,7 +641,7 @@ static BOOL IsSectionWord(NSString *word)
 {
     [aproposField selectText:self];
     if ([self useModalPanels]) {
-        if ([NSApp runModalForWindow:aproposPanel] == NSOKButton)
+        if ([NSApp runModalForWindow:aproposPanel] == NSModalResponseOK)
             [self openAproposFromPanel];
     }
     else {
@@ -641,7 +655,7 @@ static BOOL IsSectionWord(NSString *word)
         [[sender window] orderOut:self];
 
     if ([[sender window] level] == NSModalPanelWindowLevel) {
-        [NSApp stopModalWithCode:NSOKButton];
+        [NSApp stopModalWithCode:NSModalResponseOK];
     }
     else {
         [self openTitleFromPanel];
@@ -654,7 +668,7 @@ static BOOL IsSectionWord(NSString *word)
         [[sender window] orderOut:self];
 
     if ([[sender window] level] == NSModalPanelWindowLevel) {
-        [NSApp stopModalWithCode:NSOKButton];
+        [NSApp stopModalWithCode:NSModalResponseOK];
     }
     else {
         [self openAproposFromPanel];
@@ -665,7 +679,7 @@ static BOOL IsSectionWord(NSString *word)
 {
     [[sender window] orderOut:self];
     if ([[sender window] level] == NSModalPanelWindowLevel)
-        [NSApp stopModalWithCode:NSCancelButton];
+        [NSApp stopModalWithCode:NSModalResponseCancel];
 }
 
 - (void)ensureActive
@@ -733,17 +747,17 @@ static BOOL IsSectionWord(NSString *word)
 /*" Methods to do the services entries "*/
 - (void)openFiles:(NSPasteboard *)pboard userData:(NSString *)data error:(NSString **)error
 {
-    NSArray *fileArray;
+    NSArray<NSURL *> *fileArray;
     NSArray *types = [pboard types];
 
-    if ([types containsObject:NSFilenamesPboardType] &&
-        (fileArray = [pboard propertyListForType:NSFilenamesPboardType]))
+    if ([types containsObject:(NSString *)kUTTypeFileURL])
     {
+        fileArray = [pboard readObjectsForClasses:@[[NSURL class]] options:@{NSPasteboardURLReadingFileURLsOnlyKey: @YES}];
         NSUInteger i, count = [fileArray count];
         __block NSError *openError = nil;
         for (i=0; i<count; i++)
         {
-			[self openDocumentWithContentsOfURL:[NSURL fileURLWithPath:fileArray[i]] display:YES completionHandler:^(NSDocument * _Nullable document, BOOL documentWasAlreadyOpen, NSError * _Nullable error) {
+			[self openDocumentWithContentsOfURL:fileArray[i] display:YES completionHandler:^(NSDocument * _Nullable document, BOOL documentWasAlreadyOpen, NSError * _Nullable error) {
 				openError = error;
 			}];
         }
@@ -757,7 +771,7 @@ static BOOL IsSectionWord(NSString *word)
 {
     for (NSPasteboardType type in pboard.types)
 	{
-		if ([type isEqualToString:(NSString *)kUTTypeUTF8PlainText] || [type isEqualToString:(NSString *)kUTTypePlainText] || [type isEqualToString:NSStringPboardType])
+		if ([type isEqualToString:(NSString *)kUTTypeUTF8PlainText] || [type isEqualToString:(NSString *)kUTTypePlainText])
 		{
 			NSString *pboardString = [pboard stringForType:type];
 			
@@ -774,7 +788,7 @@ static BOOL IsSectionWord(NSString *word)
 {
 	for (NSPasteboardType type in pboard.types)
 	{
-		if ([type isEqualToString:(NSString *)kUTTypeUTF8PlainText] || [type isEqualToString:(NSString *)kUTTypePlainText] || [type isEqualToString:NSStringPboardType])
+		if ([type isEqualToString:(NSString *)kUTTypeUTF8PlainText] || [type isEqualToString:(NSString *)kUTTypePlainText])
 		{
 			NSString *pboardString = [pboard stringForType:type];
 			

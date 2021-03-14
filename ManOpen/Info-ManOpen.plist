@@ -151,7 +151,9 @@
 			</dict>
 			<key>NSSendTypes</key>
 			<array>
-				<string>NSFilenamesPboardType</string>
+				<string>NSURLPboardType</string>
+				<string>public.url</string>
+				<string>public.file-url</string>
 			</array>
 		</dict>
 		<dict>

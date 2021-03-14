@@ -1,13 +1,8 @@
 /* PrefPanelController.h created by lindberg on Fri 08-Oct-1999 */
 
-#import <AppKit/NSWindowController.h>
+#import <AppKit/AppKit.h>
 
-@class NSMutableArray;
-@class NSFont, NSColor;
-@class NSArrayController;
-@class NSTableView, NSTextField, NSPopUpButton, NSMatrix;
-
-@interface PrefPanelController : NSWindowController
+@interface PrefPanelController : NSWindowController <NSFontChanging, NSMenuItemValidation>
 {
     NSMutableArray *manPathArray;
     IBOutlet NSArrayController *manPathController;
@@ -31,8 +26,6 @@
 - (IBAction)chooseNewApp:(id)sender;
 @end
 
-#import <Foundation/NSUserDefaults.h>
-
 @interface NSUserDefaults (ManOpenPreferences)
 - (NSFont *)manFont;
 - (NSString *)manPath;
@@ -41,8 +34,9 @@
 - (NSColor *)manBackgroundColor;
 @end
 
-
-#import <Foundation/NSFormatter.h>
 // This needs to be in the header so IB can find it
 @interface DisplayPathFormatter : NSFormatter
+@end
+
+@interface ManOpenColorDataTransformer : NSValueTransformer
 @end

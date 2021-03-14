@@ -158,11 +158,14 @@ int main (int argc, char * const *argv)
         {
             NSError *launchErr = nil;
             
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             if (![[NSWorkspace sharedWorkspace] launchApplicationAtURL:manOpenURLs.firstObject options:forceToFront ? 0UL : NSWorkspaceLaunchWithoutActivation configuration:@{} error:&launchErr])
             {
                 fprintf(stderr, "Could not launch ManOpen\n");
                 exit(1);
             }
+#pragma clang diagnostic pop
         }
         
         // Use a Mach port to open a connection; keep trying until one connects.
@@ -203,7 +206,17 @@ int main (int argc, char * const *argv)
         distributedDictionary[@"NamesAndSections"] = namesAndSections;
         
         // Once we've got all our data together, send the message to the app. The message ID below is intentional, because I feel like I went mental writing this (it was my third attempt at replacing the original DO code).
-        status = CFMessagePortSendRequest(remotePort, 5150, (CFDataRef)[NSKeyedArchiver archivedDataWithRootObject:distributedDictionary], 10.0, 10.0, NULL, NULL);
+        if (@available(macOS 10.13, *))
+        {
+            status = CFMessagePortSendRequest(remotePort, 5150, (CFDataRef)[NSKeyedArchiver archivedDataWithRootObject:distributedDictionary requiringSecureCoding:YES error:NULL], 10.0, 10.0, NULL, NULL);
+        }
+        else
+        {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            status = CFMessagePortSendRequest(remotePort, 5150, (CFDataRef)[NSKeyedArchiver archivedDataWithRootObject:distributedDictionary], 10.0, 10.0, NULL, NULL);
+#pragma clang diagnostic pop
+        }
 	}
     exit(0);       // insure the process exit status is 0
     return 0;      // ...and make main fit the ANSI spec.

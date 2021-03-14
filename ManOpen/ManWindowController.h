@@ -13,7 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ManWindowController : NSWindowController <NSMenuDelegate, NSTextViewDelegate, NSToolbarDelegate, NSWindowDelegate>
+@interface ManWindowController : NSWindowController <NSMenuDelegate, NSMenuItemValidation, NSTextViewDelegate, NSToolbarDelegate, NSToolbarItemValidation, NSWindowDelegate>
 @property(nonatomic,retain) IBOutlet ManTextView *textView;
 
 - (IBAction)saveCurrentWindowSize:(id)sender;

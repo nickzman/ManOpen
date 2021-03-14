@@ -291,10 +291,10 @@
 {
     if ([[event charactersIgnoringModifiers] isEqual:@" "])
     {
-         if ([event modifierFlags] & (NSShiftKeyMask|NSAlternateKeyMask))
-             [self pageUp:self];
-         else
-             [self pageDown:self];
+        if ([event modifierFlags] & (NSEventModifierFlagShift|NSEventModifierFlagOption))
+            [self pageUp:self];
+        else
+            [self pageDown:self];
     }
     else
     {
@@ -318,7 +318,7 @@
     NSMutableDictionary *drawAttribs = [NSMutableDictionary dictionary];
     NSRect drawRect = NSMakeRect(0.0f, 0.0f, size.width, 20.0f + [font ascender]);
 
-    [style setAlignment:NSCenterTextAlignment];
+    [style setAlignment:NSTextAlignmentCenter];
     [drawAttribs setObject:style forKey:NSParagraphStyleAttributeName];
     [drawAttribs setObject:font forKey:NSFontAttributeName];
 
