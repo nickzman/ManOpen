@@ -111,7 +111,6 @@ static CFDataRef MessagePortCallback(CFMessagePortRef port, SInt32 messageID, CF
 	if (self)
 	{
         CFMessagePortContext context;
-        CFRunLoopSourceRef messagePortRLS;
         
         // Set ourselves up for connections from the command line tool. Originally, this app used DO, but DO is deprecated, and even if it wasn't, it doesn't work in the sandbox. But Mach ports work, so we use that instead.
         // If anyone other than me is building this, then you will need to replace my developer group ID with your own below. And you'll probably need to make the same change in the app group in the entitlements as well.
@@ -120,8 +119,13 @@ static CFDataRef MessagePortCallback(CFMessagePortRef port, SInt32 messageID, CF
         self.messagePort = CFMessagePortCreateLocal(nil, CFSTR("8D98N325TG.org.clindberg.ManOpen.MachIPC"), MessagePortCallback, &context, false);
         if (self.messagePort)   // don't crash if creating a message port didn't work
         {
-            messagePortRLS = CFMessagePortCreateRunLoopSource(NULL, self.messagePort, 0);
-            CFRunLoopAddSource(CFRunLoopGetMain(), messagePortRLS, kCFRunLoopCommonModes);
+            CFRunLoopSourceRef messagePortRLS = CFMessagePortCreateRunLoopSource(NULL, self.messagePort, 0);
+            
+            if (messagePortRLS)
+            {
+                CFRunLoopAddSource(CFRunLoopGetMain(), messagePortRLS, kCFRunLoopCommonModes);
+                CFRelease(messagePortRLS);
+            }
         }
 		
 		[PrefPanelController registerManDefaults];
