@@ -10,6 +10,12 @@
 - (void)restoreStateWithCoder:(NSCoder *)coder;
 @end
 
+@interface AproposDocument ()
+@property(nonatomic,retain) NSString *searchString;
+@property(nonatomic,retain) NSString *title;
+@property(nonatomic,retain) NSMutableOrderedSet<NSDictionary<NSString *, NSString *> *> *titlesAndDescriptions; // this is an ordered set, rather than an array, because ordered sets will automatically filter duplicate results
+@end
+
 @implementation AproposDocument
 
 + (BOOL)canConcurrentlyReadDocumentsOfType:(NSString *)typeName
@@ -23,15 +29,14 @@
     NSMutableString *command = [docController manCommandWithManPath:manPath];
     NSData *output;
     
-    titles = [[NSMutableArray alloc] init];
-    descriptions = [[NSMutableArray alloc] init];
-	title = aTitle;
+    self.titlesAndDescriptions = [[NSMutableOrderedSet alloc] init];
+	self.title = aTitle;
     [self setFileType:@"apropos"];
 
     /* Searching for a blank string doesn't work anymore... use a catchall regex */
     if ([apropos length] == 0)
         apropos = @".";
-	searchString = apropos;
+	self.searchString = apropos;
 
     /*
      * Starting on Tiger, man -k doesn't quite work the same as apropos directly.
@@ -55,7 +60,8 @@
 	{
 		[self _loadWithString:apropos manPath:manPath title:aTitle];
 		
-		if ([titles count] == 0) {
+        if (self.titlesAndDescriptions.count == 0)
+        {
             NSAlert *nothingFoundAlert = [[NSAlert alloc] init];
             
             nothingFoundAlert.messageText = NSLocalizedString(@"Nothing found", @"Title of an unsuccessful apropos search");
@@ -75,7 +81,7 @@
 
 - (NSString *)displayName
 {
-    return title;
+    return self.title;
 }
 
 - (void)windowControllerDidLoadNib:(NSWindowController *)windowController
@@ -87,7 +93,7 @@
     if (sizeString != nil)
     {
         NSSize windowSize = NSSizeFromString(sizeString);
-        NSWindow *window = [tableView window];
+        NSWindow *window = self.tableView.window;
         NSRect frame = [window frame];
 
         if (windowSize.width > 30.0 && windowSize.height > 30.0) {
@@ -96,9 +102,9 @@
         }
     }
 
-    [tableView setTarget:self];
-    [tableView setDoubleAction:@selector(openManPages:)];
-    [tableView sizeLastColumnToFit];
+    self.tableView.target = self;
+    self.tableView.doubleAction = @selector(openManPages:);
+    [self.tableView sizeLastColumnToFit];
 }
 
 - (void)parseOutput:(NSString *)output
@@ -129,43 +135,49 @@
 
         if (dashRange.length == 0) continue;
 
-        [titles addObject:[line substringToIndex:dashRange.location]];
-        [descriptions addObject:[line substringFromIndex:NSMaxRange(dashRange)]];
+        [self.titlesAndDescriptions addObject:@{@"titles": [line substringToIndex:dashRange.location], @"descriptions": [line substringFromIndex:NSMaxRange(dashRange)]}];  // the keys must be synchronized with the table column identifiers, or the table data source will fail
     }
 }
 
 - (IBAction)saveCurrentWindowSize:(id)sender
 {
-    NSSize size = [[tableView window] frame].size;
+    NSSize size = self.tableView.window.frame.size;
     [[NSUserDefaults standardUserDefaults] setObject:NSStringFromSize(size) forKey:@"AproposWindowSize"];
 }
 
 - (IBAction)openManPages:(id)sender
 {
-    if ([sender clickedRow] >= 0) {
-        NSString *manPage = [titles objectAtIndex:[sender clickedRow]];
-        [[ManDocumentController sharedDocumentController] openString:manPage oneWordOnly:YES];
+    if (sender == self.tableView)
+    {
+        NSInteger clickedRow = self.tableView.clickedRow;
+        
+        if (clickedRow >= 0L)
+        {
+            NSDictionary *titleAndDescription = self.titlesAndDescriptions[clickedRow];
+            NSString *manPage = titleAndDescription[@"titles"];
+            
+            [[ManDocumentController sharedDocumentController] openString:manPage oneWordOnly:YES];
+        }
     }
 }
 
 - (void)printDocumentWithSettings:(NSDictionary<NSPrintInfoAttributeKey,id> *)printSettings showPrintPanel:(BOOL)showPrintPanel delegate:(id)delegate didPrintSelector:(SEL)didPrintSelector contextInfo:(void *)contextInfo
 {
-    NSPrintOperation *op = [NSPrintOperation printOperationWithView:tableView];
+    NSPrintOperation *op = [NSPrintOperation printOperationWithView:self.tableView];
     [op setShowsPrintPanel:showPrintPanel];
     [op setShowsProgressPanel:showPrintPanel];
-    [op runOperationModalForWindow:[tableView window] delegate:nil didRunSelector:NULL contextInfo:NULL];
+    [op runOperationModalForWindow:self.tableView.window delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
 /* NSTableView dataSource */
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
-    return [titles count];
+    return self.titlesAndDescriptions.count;
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    NSArray *strings = (tableColumn == titleColumn)? titles : descriptions;
-    return [strings objectAtIndex:row];
+    return self.titlesAndDescriptions[row][tableColumn.identifier];
 }
 
 /* Document restoration */
@@ -175,8 +187,8 @@
 - (void)encodeRestorableStateWithCoder:(NSCoder *)coder
 {
     [super encodeRestorableStateWithCoder:coder];
-    [coder encodeObject:searchString forKey:RestoreSearchString];
-    [coder encodeObject:title forKey:RestoreTitle];
+    [coder encodeObject:self.searchString forKey:RestoreSearchString];
+    [coder encodeObject:self.title forKey:RestoreTitle];
 }
 
 - (void)restoreStateWithCoder:(NSCoder *)coder
@@ -192,7 +204,7 @@
     
     [self _loadWithString:search manPath:manPath title:theTitle];
     [[self windowControllers] makeObjectsPerformSelector:@selector(synchronizeWindowTitleWithDocumentName)];
-    [tableView reloadData];
+    [self.tableView reloadData];
 }
 
 @end
